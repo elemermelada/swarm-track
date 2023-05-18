@@ -1,10 +1,5 @@
 # Image based in python:slim
-FROM python:slim AS tudatenv
-
-# TODO - Do i need this here?
-# Copy all files
-WORKDIR /usr/src
-COPY . .
+FROM python:latest AS tudatenv
 
 # Update and install packages
 RUN apt-get update && apt-get -y upgrade \

@@ -1,5 +1,4 @@
-MSG = input("Pasa fiera? ")
-text = "Hola mundo! " + MSG
-with open('out/result', 'w') as f:
-	f.write(text)
-print(text)
+RUN_APP = input("Run main app? [y]/n: ")
+
+if not (RUN_APP == "N" or RUN_APP == "n"):
+	import app
