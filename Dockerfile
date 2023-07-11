@@ -1,5 +1,5 @@
 # Image based in tudatenv
-FROM tudat-space
+FROM tudatenv
 
 # Copy all files
 WORKDIR /usr/src

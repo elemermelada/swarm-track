@@ -28,4 +28,6 @@ RUN echo "Running $(conda --version)" && \
     conda update conda && \
     wget https://docs.tudat.space/en/latest/_downloads/dfbbca18599275c2afb33b6393e89994/environment.yaml && \
     conda env create -f environment.yaml && \
-    conda activate tudat-space
+    conda activate tudat-space && \
+    conda install -c tudat-team/label/dev tudat && \
+    conda install -c tudat-team/label/dev tudatpy
