@@ -1,6 +1,4 @@
-from ast import Tuple
 from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -12,7 +10,7 @@ def plot_ephemeris(ax: Axes, ephemeris, axis=[1, 2], color="b", linestyle="-"):
     return ax
 
 
-def plot_trajectory(
+def plot_trajectory_from_spice(
     ax: Axes,
     spice,
     body,
@@ -34,7 +32,7 @@ def plot_trajectory(
                 ephemeris_time=epoch,
             )
         )
-    ephemeris = np.array(ephemeris)
+    ephemeris = np.array(ephemeris) * 1e-3
     return plot_ephemeris(ax, ephemeris, axis, color, linestyle)
 
 
