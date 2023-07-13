@@ -1,4 +1,7 @@
-RUN_APP = input("Run main app? [y]/n: ")
+RUN_APP = input("Input case: ")
 
-if not (RUN_APP == "N" or RUN_APP == "n"):
-	import app
+if RUN_APP == "DSN1" or RUN_APP == "dsn1":
+    import DSN1
+
+if RUN_APP == "MEX1" or RUN_APP == "mex1":
+    import MEX1
