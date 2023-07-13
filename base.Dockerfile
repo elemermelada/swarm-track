@@ -11,23 +11,26 @@ RUN apt-get update && apt-get -y upgrade \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+# Add devuser to avoid using 
+RUN addgroup --gid 1000 devuser
+RUN adduser --disabled-password --gecos "" --home /home/devuser --uid 1000 --gid 1000 devuser
+ENV HOME /home/devuser
+USER devuser
+WORKDIR /home/devuser
+
 # Conda stuff
-ENV PATH="/root/miniconda3/bin:${PATH}"
-ARG PATH="/root/miniconda3/bin:${PATH}"
+ENV PATH="/home/devuser/miniconda3/bin:${PATH}"
+ARG PATH="/home/devuser/miniconda3/bin:${PATH}"
 
 # Download and install conda
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-    && mkdir /root/.conda \
+    && mkdir /home/devuser/.conda \
     && bash Miniconda3-latest-Linux-x86_64.sh -b \
     && rm -f Miniconda3-latest-Linux-x86_64.sh
 
 # Update conda and create tudat environment
-RUN echo "Running $(conda --version)" && \
-    conda init bash && \
-    . /root/.bashrc &&\
+RUN conda init bash && \
+    . /home/devuser/.bashrc &&\
     conda update conda && \
     wget https://docs.tudat.space/en/latest/_downloads/dfbbca18599275c2afb33b6393e89994/environment.yaml && \
-    conda env create -f environment.yaml && \
-    conda activate tudat-space && \
-    conda install -c tudat-team/label/dev tudat && \
-    conda install -c tudat-team/label/dev tudatpy
+    conda env create -f environment.yaml

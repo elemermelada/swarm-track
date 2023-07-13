@@ -2,9 +2,15 @@
 FROM tudatenv
 
 # Copy all files
-WORKDIR /usr/src
+WORKDIR /home/devuser/src
 COPY . .
-    
-RUN echo 'conda activate tudat-space' >> /root/.bashrc
+USER root
+RUN chown devuser:devuser -R .
+USER devuser
+
+# Append settings to .bashrc
+RUN cat dev/bashrc.sh >> /home/devuser/.bashrc
+
+# Run code from bash
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
-CMD ["python setup.py"]
+CMD ["/home/devuser/miniconda3/envs/tudat-space/bin/python setup.py"]

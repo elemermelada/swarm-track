@@ -1,7 +1,5 @@
 # Load required standard modules
 import numpy as np
-from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import axes3d
 
 # Load required tudatpy modules
 from tudatpy.kernel.interface import spice
@@ -25,7 +23,11 @@ from util.dynamical_models import basic_propagator
 from util.estimation import create_estimator, estimate
 from util.estimation_setup import create_parameters_to_estimate
 
-from util.graphs import init_trajectory_graph, plot_mars, plot_trajectory
+from util.graphs import (
+    init_trajectory_graph,
+    plot_mars,
+    plot_trajectory_from_spice,
+)
 from util.point_distributions import fibonacci_sphere
 
 from init.MEX1 import bodies, simulation_start_epoch, simulation_end_epoch, tw_number
@@ -35,7 +37,9 @@ add_radiation_pressure(bodies, environment_setup)
 
 # Create trajectory plot
 ax, fig = init_trajectory_graph()
-ax = plot_trajectory(ax, spice, "MEX", simulation_start_epoch, simulation_end_epoch)
+ax = plot_trajectory_from_spice(
+    ax, spice, "MEX", simulation_start_epoch, simulation_end_epoch, axis=[1, 2]
+)
 ax = plot_mars(ax, spice)
 ax.legend()
 fig.tight_layout()
