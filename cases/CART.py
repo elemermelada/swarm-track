@@ -13,10 +13,9 @@ from util.environment_setup import add_radiation_pressure, add_tw_stations
 from util.observation_setup import (
     add_noise,
     add_observation_simulators,
-    add_simple_doppler_observation_settings,
-    add_simple_range_observation_settings,
+    add_simple_cartesian_observation_settings,
     add_viability_check,
-    create_ow_links,
+    create_cart_link,
 )
 from util.observation import perform_observations
 from util.dynamical_models import basic_propagator
@@ -28,9 +27,9 @@ from util.graphs import (
     plot_mars,
     plot_trajectory_from_spice,
 )
-from util.point_distributions import fibonacci_sphere
+from util.point_distributions import random_sphere
 
-from init.MEXDSN import bodies, simulation_start_epoch, simulation_end_epoch, tw_number
+from init.MEX1TW import bodies, simulation_start_epoch, simulation_end_epoch, tw_number
 
 # Add radiation pressure to environment
 add_radiation_pressure(bodies, environment_setup)
@@ -46,64 +45,31 @@ fig.tight_layout()
 fig.savefig("out/truth.png")
 
 # Add TW stations and create links to MEX
-add_tw_stations(environment_setup, bodies.get("Mars"), tw_number, fibonacci_sphere)
-links = create_ow_links(observation, tw_number, "MEX")
+add_tw_stations(environment_setup, bodies.get("Mars"), tw_number, random_sphere)
+links = create_cart_link(observation, "MEX")
 
 # General observation settings
-light_time_correction_settings = (
-    observation.first_order_relativistic_light_time_correction(["Sun"])
-)
 observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 60.0)
 
-# Add doppler "sensors"
-observation_settings_list = add_simple_doppler_observation_settings(
+# Add cartesian "sensors"
+TYPE = observation.position_observable_type
+observation_settings_list = add_simple_cartesian_observation_settings(
     observation,
-    tw_number,
     links,
-    light_time_correction_settings=light_time_correction_settings,
 )
 observation_simulation_settings = add_observation_simulators(
-    observation, observation_times, links, tw_number, observation.one_way_range_type
+    observation, observation_times, links, TYPE
 )
 add_noise(
     observation,
     1.0e-3,
-    observation.one_way_instantaneous_doppler_type,
+    TYPE,
     observation_simulation_settings,
 )
 add_viability_check(
     observation,
-    observation.one_way_instantaneous_doppler_type,
+    TYPE,
     np.deg2rad(15),
-    tw_number,
-    observation_simulation_settings,
-    links,
-)
-
-# Add range "sensors"
-observation_settings_list = add_simple_range_observation_settings(
-    observation,
-    tw_number,
-    links,
-    light_time_correction_settings=light_time_correction_settings,
-    observation_settings_list=observation_settings_list,
-)
-observation_simulation_settings = add_observation_simulators(
-    observation,
-    observation_times,
-    links,
-    tw_number,
-    observation.one_way_instantaneous_doppler_type,
-    observation_simulation_settings=observation_simulation_settings,
-)
-add_noise(
-    observation, 1.0, observation.one_way_range_type, observation_simulation_settings
-)
-add_viability_check(
-    observation,
-    observation.one_way_range_type,
-    np.deg2rad(15),
-    tw_number,
     observation_simulation_settings,
     links,
 )
@@ -138,3 +104,4 @@ estimator = create_estimator(
     propagator_settings_estimation,
 )
 estimation_output = estimate(estimation, estimator, simulated_observations)
+print("Wait")
