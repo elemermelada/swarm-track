@@ -34,7 +34,7 @@ def create_cartesian_observations(observation_times, bodies):
     links = create_cart_link("MEX")
 
     # Add cartesian "sensors"
-    TYPE = observation.position_observable_type
+    observable_type = observation.position_observable_type
 
     observation_settings_list = add_simple_cartesian_observation_settings(
         links,
@@ -43,7 +43,7 @@ def create_cartesian_observations(observation_times, bodies):
     observation_simulation_settings = add_observation_simulators(
         observation_times,
         links,
-        TYPE,
+        observable_type,
         reference_link_end_type=observation.observed_body,
     )
 

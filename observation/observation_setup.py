@@ -125,21 +125,21 @@ def add_viability_check(
 def create_simple_doppler_sensors(
     links, light_time_correction_settings, observation_times
 ):
-    TYPE = observation.one_way_instantaneous_doppler_type
+    observable_type = observation.one_way_instantaneous_doppler_type
     observation_settings_list = add_simple_doppler_observation_settings(
         links,
         light_time_correction_settings=light_time_correction_settings,
     )
     observation_simulation_settings = add_observation_simulators(
-        observation_times, links, TYPE
+        observation_times, links, observable_type
     )
     add_noise(
         1.0e-3,
-        TYPE,
+        observable_type,
         observation_simulation_settings,
     )
     add_viability_check(
-        TYPE,
+        observable_type,
         np.deg2rad(15),
         observation_simulation_settings,
         links,
