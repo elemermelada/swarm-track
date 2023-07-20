@@ -10,6 +10,13 @@ def plot_ephemeris(ax: Axes, ephemeris, axis=[1, 2], color="b", linestyle="-"):
     return ax
 
 
+def scatter_ephemeris(ax: Axes, ephemeris, axis=[1, 2], color="b", linestyle="-"):
+    ax.scatter(
+        ephemeris[:, axis[0]], ephemeris[:, axis[1]], color=color, linestyle=linestyle
+    )
+    return ax
+
+
 def plot_trajectory_from_spice(
     ax: Axes,
     spice,

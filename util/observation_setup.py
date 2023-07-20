@@ -86,11 +86,18 @@ def add_observation_simulators(
     links,
     observation_type,
     observation_simulation_settings: list = list(),
+    reference_link_end_type=None,
 ):
+    reference_link = (
+        reference_link_end_type if reference_link_end_type else observation.receiver
+    )
     for link in links:
         observation_simulation_settings.append(
             observation.tabulated_simulation_settings(
-                observation_type, link, observation_times
+                observation_type,
+                link,
+                observation_times,
+                reference_link_end_type=reference_link,
             )
         )
     return observation_simulation_settings
