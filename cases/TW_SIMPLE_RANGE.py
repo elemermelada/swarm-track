@@ -8,17 +8,16 @@ from util.graphs import (
     plot_ephemeris,
     plot_mars,
     plot_trajectory_from_spice,
-    scatter_ephemeris,
 )
 
-from observation.observation_setup import create_simple_range_sensors
+from observation.observation_setup import create_simple_1w_range_sensors
 from observation.observation import create_cartesian_observations, perform_observations
 
 from estimation.estimation_setup import create_simple_parameters_to_estimate
 from estimation.estimation import create_estimator, estimate
 from estimation.estimation_postprocessing import retrieve_best_iteration_state_history
 
-from init.MEX10TWSHORT import (
+from init.MEX_10TW_SHORT import (
     bodies,
     simulation_start_epoch,
     simulation_end_epoch,
@@ -43,7 +42,7 @@ ax = plot_mars(ax, threeD=True)
 (
     observation_settings_list,
     observation_simulation_settings,
-) = create_simple_range_sensors(
+) = create_simple_1w_range_sensors(
     links, light_time_correction_settings, observation_times
 )
 

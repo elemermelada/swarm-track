@@ -17,6 +17,24 @@ def create_1w_tw_links(tw_number, body):
     return links
 
 
+def create_2w_dsn_links(body, dsn_antennae):
+    links = []
+    for antenna in dsn_antennae:
+        two_way_link_ends = dict()
+        two_way_link_ends[
+            observation.transmitter
+        ] = observation.body_reference_point_link_end_id("Earth", antenna)
+        two_way_link_ends[
+            observation.retransmitter
+        ] = observation.body_origin_link_end_id(body)
+        two_way_link_ends[
+            observation.receiver
+        ] = observation.body_reference_point_link_end_id("Earth", antenna)
+        two_way_link_definition = observation.LinkDefinition(two_way_link_ends)
+        links.append(two_way_link_definition)
+    return links
+
+
 def create_cart_link(body):
     cart_link_ends = dict()
     cart_link_ends[observation.observed_body] = observation.body_origin_link_end_id(
@@ -26,7 +44,7 @@ def create_cart_link(body):
     return [cart_link_definition]
 
 
-def add_simple_doppler_observation_settings(
+def add_simple_1w_doppler_observation_settings(
     links,
     observation_settings_list: list = list(),
     light_time_correction_settings=None,
@@ -44,7 +62,25 @@ def add_simple_doppler_observation_settings(
     return observation_settings_list
 
 
-def add_simple_range_observation_settings(
+def add_simple_2w_doppler_observation_settings(
+    links,
+    observation_settings_list: list = list(),
+    light_time_correction_settings=None,
+):
+    light_time_correction_settings = (
+        observation.first_order_relativistic_light_time_correction(["Sun"])
+    )
+    for link in links:
+        observation_settings_list.append(
+            observation.two_doppler_instantaneous(
+                link,
+                light_time_correction_settings=[light_time_correction_settings],
+            )
+        )
+    return observation_settings_list
+
+
+def add_simple_1w_range_observation_settings(
     links,
     observation_settings_list: list = list(),
     light_time_correction_settings=None,
@@ -122,11 +158,11 @@ def add_viability_check(
         )
 
 
-def create_simple_doppler_sensors(
+def create_simple_1w_doppler_sensors(
     links, light_time_correction_settings, observation_times
 ):
     observable_type = observation.one_way_instantaneous_doppler_type
-    observation_settings_list = add_simple_doppler_observation_settings(
+    observation_settings_list = add_simple_1w_doppler_observation_settings(
         links,
         light_time_correction_settings=light_time_correction_settings,
     )
@@ -147,11 +183,59 @@ def create_simple_doppler_sensors(
     return observation_settings_list, observation_simulation_settings
 
 
-def create_simple_range_sensors(
+def create_simple_2w_doppler_sensors(
+    links, light_time_correction_settings, observation_times
+):
+    observable_type = observation.two_way_instantaneous_doppler_type
+    observation_settings_list = add_simple_2w_doppler_observation_settings(
+        links,
+        light_time_correction_settings=light_time_correction_settings,
+    )
+    observation_simulation_settings = add_observation_simulators(
+        observation_times, links, observable_type
+    )
+    add_noise(
+        1.0e-3,
+        observable_type,
+        observation_simulation_settings,
+    )
+    add_viability_check(
+        observable_type,
+        np.deg2rad(15),
+        observation_simulation_settings,
+        links,
+    )
+    return observation_settings_list, observation_simulation_settings
+
+
+def create_2w_doppler_sensors(links, light_time_correction_settings, observation_times):
+    observable_type = observation.two_way_instantaneous_doppler_type
+    observation_settings_list = add_simple_2w_doppler_observation_settings(
+        links,
+        light_time_correction_settings=light_time_correction_settings,
+    )
+    observation_simulation_settings = add_observation_simulators(
+        observation_times, links, observable_type
+    )
+    add_noise(
+        1.0e-3,
+        observable_type,
+        observation_simulation_settings,
+    )
+    add_viability_check(
+        observable_type,
+        np.deg2rad(15),
+        observation_simulation_settings,
+        links,
+    )
+    return observation_settings_list, observation_simulation_settings
+
+
+def create_simple_1w_range_sensors(
     links, light_time_correction_settings, observation_times
 ):
     observable_type = observation.one_way_range_type
-    observation_settings_list = add_simple_range_observation_settings(
+    observation_settings_list = add_simple_1w_range_observation_settings(
         links,
         light_time_correction_settings=light_time_correction_settings,
     )

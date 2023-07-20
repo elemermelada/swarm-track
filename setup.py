@@ -1,7 +1,7 @@
 RUN_APP = input("Input case: ")
 
 if RUN_APP.upper() == "DSN1":
-    from cases.DSN1 import *
+    from cases.DSN import *
 
 if RUN_APP.upper() == "MEX1":
     from cases.TW_SIMPLE_DOPPLER import *
