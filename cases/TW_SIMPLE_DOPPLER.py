@@ -41,14 +41,6 @@ ax = plot_mars(ax)
     links, light_time_correction_settings, observation_times
 )
 
-# # Add range "sensors"
-# (
-#     observation_settings_list,
-#     observation_simulation_settings,
-# ) = create_simple_range_sensors(
-#     links, light_time_correction_settings, observation_times
-# )
-
 # Create observations
 simulated_observations = perform_observations(
     observation_settings_list,

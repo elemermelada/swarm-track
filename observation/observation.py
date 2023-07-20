@@ -30,11 +30,9 @@ def create_cartesian_observations(observation_times, bodies):
 
     # Add cartesian "sensors"
     observable_type = observation.position_observable_type
-
     observation_settings_list = add_simple_cartesian_observation_settings(
         links,
     )
-
     observation_simulation_settings = add_observation_simulators(
         observation_times,
         links,

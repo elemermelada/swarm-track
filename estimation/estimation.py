@@ -14,10 +14,10 @@ def create_estimator(
     return estimator
 
 
-def estimate(estimator, simulated_observations):
+def estimate(estimator, simulated_observations, max_iters=10):
     convergence_checker = estimation.estimation_convergence_checker(
-        maximum_iterations=10, number_of_iterations_without_improvement=2
-    )  # TODO - test and add this
+        maximum_iterations=max_iters, number_of_iterations_without_improvement=2
+    )
     estimation_input = estimation.EstimationInput(
         simulated_observations, convergence_checker=convergence_checker
     )
