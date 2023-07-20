@@ -78,7 +78,7 @@ def plot_mars(ax: Axes, threeD=False):
     return ax
 
 
-def init_trajectory_graph(threeD):
+def init_trajectory_graph(threeD=False):
     if threeD:
         fig = plt.figure()
         ax = fig.add_subplot(projection="3d")
