@@ -17,7 +17,8 @@
 				"ms-python.black-formatter",
 				"marp-team.marp-vscode",
 				"gruntfuggly.todo-tree",
-				"ms-azuretools.vscode-docker"
+				"ms-azuretools.vscode-docker",
+				"eamodio.gitlens"
             ]
         }
     }
