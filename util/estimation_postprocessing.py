@@ -1,5 +1,7 @@
 import numpy as np
 
+from util.math import vector_rms
+
 
 def retrieve_observation_residuals(
     final_residuals, observations, observable_type, link=None
@@ -24,3 +26,27 @@ def retrieve_observation_residuals(
         observable_time = observable_time[concatenated_links == link]
 
     return observable_time, observable_residuals
+
+
+def retrieve_best_iteration_index(estimation_output) -> int:
+    n_iter = estimation_output.residual_history.shape[1]
+    residual_history = estimation_output.residual_history
+    min_rms = np.inf
+    min_rms_i = -1
+    for i in range(n_iter):
+        if vector_rms(residual_history[:, i]) < min_rms:
+            min_rms = vector_rms(residual_history[:, i])
+            min_rms_i = i
+    return min_rms_i
+
+
+def retrieve_state_history_from_iteration(iteration):
+    return iteration.dynamics_results.state_history
+
+
+def retrieve_best_iteration_state_history(estimation_output, clean=False):
+    iter_index = retrieve_best_iteration_index(estimation_output)
+    iter = estimation_output.simulation_results_per_iteration[iter_index]
+    if clean:
+        return np.array(list(retrieve_state_history_from_iteration(iter).values()))
+    return retrieve_state_history_from_iteration(iter)

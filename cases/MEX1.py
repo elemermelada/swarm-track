@@ -16,7 +16,7 @@ from util.observation_setup import (
     add_simple_doppler_observation_settings,
     add_simple_range_observation_settings,
     add_viability_check,
-    create_links,
+    create_ow_links,
 )
 from util.observation import perform_observations
 from util.dynamical_models import basic_propagator
@@ -30,7 +30,7 @@ from util.graphs import (
 )
 from util.point_distributions import fibonacci_sphere
 
-from init.MEX1 import bodies, simulation_start_epoch, simulation_end_epoch, tw_number
+from init.MEX10TW import bodies, simulation_start_epoch, simulation_end_epoch, tw_number
 
 # Add radiation pressure to environment
 add_radiation_pressure(bodies, environment_setup)
@@ -47,7 +47,7 @@ fig.savefig("out/truth.png")
 
 # Add TW stations and create links to MEX
 add_tw_stations(environment_setup, bodies.get("Mars"), tw_number, fibonacci_sphere)
-links = create_links(observation, tw_number, "MEX")
+links = create_ow_links(observation, tw_number, "MEX")
 
 # General observation settings
 light_time_correction_settings = (
@@ -58,12 +58,11 @@ observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 60.0
 # Add doppler "sensors"
 observation_settings_list = add_simple_doppler_observation_settings(
     observation,
-    tw_number,
     links,
     light_time_correction_settings=light_time_correction_settings,
 )
 observation_simulation_settings = add_observation_simulators(
-    observation, observation_times, links, tw_number, observation.one_way_range_type
+    observation, observation_times, links, observation.one_way_range_type
 )
 add_noise(
     observation,
@@ -75,7 +74,6 @@ add_viability_check(
     observation,
     observation.one_way_instantaneous_doppler_type,
     np.deg2rad(15),
-    tw_number,
     observation_simulation_settings,
     links,
 )
@@ -83,7 +81,6 @@ add_viability_check(
 # Add range "sensors"
 observation_settings_list = add_simple_range_observation_settings(
     observation,
-    tw_number,
     links,
     light_time_correction_settings=light_time_correction_settings,
     observation_settings_list=observation_settings_list,
@@ -92,7 +89,6 @@ observation_simulation_settings = add_observation_simulators(
     observation,
     observation_times,
     links,
-    tw_number,
     observation.one_way_instantaneous_doppler_type,
     observation_simulation_settings=observation_simulation_settings,
 )
@@ -103,7 +99,6 @@ add_viability_check(
     observation,
     observation.one_way_range_type,
     np.deg2rad(15),
-    tw_number,
     observation_simulation_settings,
     links,
 )

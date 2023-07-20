@@ -16,7 +16,7 @@ from util.observation_setup import (
     add_simple_doppler_observation_settings,
     add_simple_range_observation_settings,
     add_viability_check,
-    create_links,
+    create_ow_links,
 )
 from util.observation import perform_observations
 from util.dynamical_models import basic_propagator
@@ -26,12 +26,11 @@ from util.estimation_setup import create_parameters_to_estimate
 from util.graphs import (
     init_trajectory_graph,
     plot_mars,
-    plot_trajectory,
     plot_trajectory_from_spice,
 )
 from util.point_distributions import fibonacci_sphere
 
-from init.MEX1 import bodies, simulation_start_epoch, simulation_end_epoch, tw_number
+from init.MEXDSN import bodies, simulation_start_epoch, simulation_end_epoch, tw_number
 
 # Add radiation pressure to environment
 add_radiation_pressure(bodies, environment_setup)
@@ -48,7 +47,7 @@ fig.savefig("out/truth.png")
 
 # Add TW stations and create links to MEX
 add_tw_stations(environment_setup, bodies.get("Mars"), tw_number, fibonacci_sphere)
-links = create_links(observation, tw_number, "MEX")
+links = create_ow_links(observation, tw_number, "MEX")
 
 # General observation settings
 light_time_correction_settings = (
