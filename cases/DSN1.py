@@ -47,7 +47,7 @@ fig.savefig("out/truth.png")
 
 # Add TW stations and create links to MEX
 add_tw_stations(environment_setup, bodies.get("Mars"), tw_number, fibonacci_sphere)
-links = create_ow_links(observation, tw_number, "MEX")
+links = create_ow_links(tw_number, "MEX")
 
 # General observation settings
 light_time_correction_settings = (
@@ -57,7 +57,6 @@ observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 60.0
 
 # Add doppler "sensors"
 observation_settings_list = add_simple_doppler_observation_settings(
-    observation,
     tw_number,
     links,
     light_time_correction_settings=light_time_correction_settings,

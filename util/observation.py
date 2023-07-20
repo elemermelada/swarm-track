@@ -23,7 +23,7 @@ def create_cartesian_observations(observation_times, bodies):
 
     from util.observation_setup import create_cart_link
 
-    links = create_cart_link(observation, "MEX")
+    links = create_cart_link("MEX")
 
     # Add cartesian "sensors"
     TYPE = observation.position_observable_type

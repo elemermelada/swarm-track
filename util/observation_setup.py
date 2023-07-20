@@ -1,4 +1,8 @@
-def create_ow_links(observation, tw_number, body):
+from tudatpy.kernel.numerical_simulation.estimation_setup import observation
+import numpy as np
+
+
+def create_ow_links(tw_number, body):
     links = []
     for i in range(tw_number):
         one_way_link_ends = dict()
@@ -13,7 +17,7 @@ def create_ow_links(observation, tw_number, body):
     return links
 
 
-def create_cart_link(observation, body):
+def create_cart_link(body):
     cart_link_ends = dict()
     cart_link_ends[observation.observed_body] = observation.body_origin_link_end_id(
         body
@@ -23,7 +27,6 @@ def create_cart_link(observation, body):
 
 
 def add_simple_doppler_observation_settings(
-    observation,
     links,
     observation_settings_list: list = list(),
     light_time_correction_settings=None,
@@ -42,7 +45,6 @@ def add_simple_doppler_observation_settings(
 
 
 def add_simple_range_observation_settings(
-    observation,
     links,
     observation_settings_list: list = list(),
     light_time_correction_settings=None,
@@ -61,15 +63,9 @@ def add_simple_range_observation_settings(
 
 
 def add_simple_cartesian_observation_settings(
-    observation,
     links,
     observation_settings_list: list = list(),
-    bias=None,
 ):
-    cartesian_bias_settings = None
-    if bias:  # TODO - fix this shit maybe
-        cartesian_bias_settings = observation.absolute_bias([bias])
-
     for link in links:
         observation_settings_list.append(
             observation.cartesian_position(
@@ -81,7 +77,6 @@ def add_simple_cartesian_observation_settings(
 
 
 def add_observation_simulators(
-    observation,
     observation_times,
     links,
     observation_type,
@@ -103,16 +98,13 @@ def add_observation_simulators(
     return observation_simulation_settings
 
 
-def add_noise(
-    observation, noise_level, observation_type, observation_simulation_settings
-):
+def add_noise(noise_level, observation_type, observation_simulation_settings):
     observation.add_gaussian_noise_to_observable(
         observation_simulation_settings, noise_level, observation_type
     )
 
 
 def add_viability_check(
-    observation,
     observation_type,
     elevation_angle,
     observation_simulation_settings,
@@ -128,3 +120,56 @@ def add_viability_check(
             observation_type,
             links[i],
         )
+
+
+def create_simple_doppler_sensors(
+    links, light_time_correction_settings, observation_times
+):
+    TYPE = observation.one_way_instantaneous_doppler_type
+    observation_settings_list = add_simple_doppler_observation_settings(
+        links,
+        light_time_correction_settings=light_time_correction_settings,
+    )
+    observation_simulation_settings = add_observation_simulators(
+        observation_times, links, TYPE
+    )
+    add_noise(
+        1.0e-3,
+        TYPE,
+        observation_simulation_settings,
+    )
+    add_viability_check(
+        TYPE,
+        np.deg2rad(15),
+        observation_simulation_settings,
+        links,
+    )
+    return observation_settings_list, observation_simulation_settings
+
+
+def create_simple_range_sensors(
+    links, light_time_correction_settings, observation_times
+):
+    observation_settings_list = add_simple_range_observation_settings(
+        links,
+        light_time_correction_settings=light_time_correction_settings,
+        observation_settings_list=observation_settings_list,
+    )
+    observation_simulation_settings = add_observation_simulators(
+        observation_times,
+        links,
+        observation.one_way_instantaneous_doppler_type,
+        observation_simulation_settings=observation_simulation_settings,
+    )
+    add_noise(
+        1.0,
+        observation.one_way_range_type,
+        observation_simulation_settings,
+    )
+    add_viability_check(
+        observation.one_way_range_type,
+        np.deg2rad(15),
+        observation_simulation_settings,
+        links,
+    )
+    return observation_settings_list, observation_simulation_settings

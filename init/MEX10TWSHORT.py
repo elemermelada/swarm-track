@@ -1,8 +1,12 @@
 import os
+import numpy as np
 from tudatpy.kernel import constants
 from tudatpy.kernel.numerical_simulation import environment_setup
+from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 from tudatpy.kernel.interface import spice
-from util.environment_setup import get_bodies
+from util.environment_setup import add_tw_stations, get_bodies
+from util.observation_setup import create_ow_links
+from util.point_distributions import fibonacci_sphere
 
 current_directory = os.getcwd()
 
@@ -20,3 +24,13 @@ bodies = get_bodies(simulation_start_epoch, simulation_end_epoch, environment_se
 
 bodies_to_propagate = ["MEX"]
 central_bodies = ["Mars"]
+
+# Add TW stations and create links to MEX
+add_tw_stations(environment_setup, bodies.get("Mars"), tw_number, fibonacci_sphere)
+links = create_ow_links(tw_number, "MEX")
+
+# General observation settings
+light_time_correction_settings = (
+    observation.first_order_relativistic_light_time_correction(["Sun"])
+)
+observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 60.0)
