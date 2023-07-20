@@ -44,11 +44,9 @@ fig.savefig("out/truth.png")
 observation_settings_list, simulated_observations = create_cartesian_observations(
     observation_times, bodies
 )
-
 cartesian_observations = retrieve_ephemeris_from_cartesian_observations(
     simulated_observations
 )
-
 ax = scatter_ephemeris(ax, cartesian_observations * 1e-3, color="r", threeD=USE_3D)
 
 propagator_settings_estimation = basic_propagator(

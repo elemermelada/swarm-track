@@ -150,24 +150,23 @@ def create_simple_doppler_sensors(
 def create_simple_range_sensors(
     links, light_time_correction_settings, observation_times
 ):
+    observable_type = observation.one_way_range_type
     observation_settings_list = add_simple_range_observation_settings(
         links,
         light_time_correction_settings=light_time_correction_settings,
-        observation_settings_list=observation_settings_list,
     )
     observation_simulation_settings = add_observation_simulators(
         observation_times,
         links,
-        observation.one_way_instantaneous_doppler_type,
-        observation_simulation_settings=observation_simulation_settings,
+        observable_type,
     )
     add_noise(
         1.0,
-        observation.one_way_range_type,
+        observable_type,
         observation_simulation_settings,
     )
     add_viability_check(
-        observation.one_way_range_type,
+        observable_type,
         np.deg2rad(15),
         observation_simulation_settings,
         links,
