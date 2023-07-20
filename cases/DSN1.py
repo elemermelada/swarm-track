@@ -1,15 +1,7 @@
-# Load required standard modules
-import numpy as np
-
-# Load required tudatpy modules
-from tudatpy.kernel.interface import spice
-from tudatpy.kernel import numerical_simulation
-from tudatpy.kernel.numerical_simulation import propagation_setup
-
 from util.environment_setup import add_radiation_pressure
 from util.dynamical_models import basic_propagator
 from util.graphs import (
-    init_trajectory_graph,
+    init_2D_trajectory_graph,
     plot_ephemeris,
     plot_mars,
     plot_trajectory_from_spice,
@@ -18,7 +10,7 @@ from util.graphs import (
 from observation.observation_setup import create_simple_doppler_sensors
 from observation.observation import perform_observations
 
-from estimation.estimation_setup import create_parameters_to_estimate
+from estimation.estimation_setup import create_simple_parameters_to_estimate
 from estimation.estimation import create_estimator, estimate
 from estimation.estimation_postprocessing import retrieve_best_iteration_state_history
 
@@ -35,7 +27,7 @@ from init.MEX10TWSHORT import (
 add_radiation_pressure(bodies)
 
 # Create trajectory plot + mars
-ax, fig = init_trajectory_graph()
+ax, fig = init_2D_trajectory_graph()
 ax = plot_trajectory_from_spice(
     ax, "MEX", simulation_start_epoch, simulation_end_epoch, axis=[1, 2]
 )
@@ -72,11 +64,10 @@ propagator_settings_estimation = basic_propagator(
     ["MEX"],
     ["Mars"],
 )
-parameters_to_estimate = create_parameters_to_estimate(
+parameters_to_estimate = create_simple_parameters_to_estimate(
     propagator_settings_estimation, bodies
 )
 estimator = create_estimator(
-    numerical_simulation,
     bodies,
     parameters_to_estimate,
     observation_settings_list,

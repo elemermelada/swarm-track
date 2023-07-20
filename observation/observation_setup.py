@@ -2,7 +2,7 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 import numpy as np
 
 
-def create_ow_links(tw_number, body):
+def create_1w_tw_links(tw_number, body):
     links = []
     for i in range(tw_number):
         one_way_link_ends = dict()

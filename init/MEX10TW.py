@@ -8,7 +8,7 @@ from tudatpy.kernel.interface import spice
 from util.environment_setup import add_tw_stations, get_bodies
 from util.point_distributions import fibonacci_sphere
 
-from observation.observation_setup import create_ow_links
+from observation.observation_setup import create_1w_tw_links
 
 current_directory = os.getcwd()
 
@@ -30,7 +30,7 @@ central_bodies = ["Mars"]
 
 # Add TW stations and create links to MEX
 add_tw_stations(environment_setup, bodies.get("Mars"), tw_number, fibonacci_sphere)
-links = create_ow_links(tw_number, "MEX")
+links = create_1w_tw_links(tw_number, "MEX")
 
 # General observation settings
 light_time_correction_settings = (

@@ -1,3 +1,5 @@
+import numpy as np
+
 from tudatpy.kernel.numerical_simulation import propagation_setup
 from tudatpy.kernel.interface import spice
 
@@ -8,6 +10,7 @@ def basic_propagator(
     bodies,
     bodies_to_propagate,
     central_bodies,
+    initial_state_error=None,
 ):
     accelerations_settings_mars_express_estimation = dict(
         Mars=[propagation_setup.acceleration.spherical_harmonic_gravity(4, 4)],
@@ -30,6 +33,7 @@ def basic_propagator(
         bodies, acceleration_settings_estimation, bodies_to_propagate, central_bodies
     )
 
+    # Obtain an initial state
     initial_state = spice.get_body_cartesian_state_at_epoch(
         target_body_name="MEX",
         observer_body_name="Mars",
@@ -37,6 +41,14 @@ def basic_propagator(
         aberration_corrections="none",
         ephemeris_time=simulation_start_epoch,
     )
+
+    if not initial_state_error is None:
+        initial_state = np.multiply(
+            initial_state,
+            1 + np.ones(len(initial_state)) * initial_state_error,
+        )
+
+    print(initial_state)
 
     integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step_size(
         initial_time_step=60.0,

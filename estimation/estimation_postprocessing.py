@@ -28,7 +28,7 @@ def retrieve_observation_residuals(
     return observable_time, observable_residuals
 
 
-def retrieve_best_iteration_index(estimation_output) -> int:
+def retrieve_best_iteration_index(estimation_output, verbose=True) -> int:
     n_iter = estimation_output.residual_history.shape[1]
     residual_history = estimation_output.residual_history
     min_rms = np.inf
@@ -37,6 +37,8 @@ def retrieve_best_iteration_index(estimation_output) -> int:
         if vector_rms(residual_history[:, i]) < min_rms:
             min_rms = vector_rms(residual_history[:, i])
             min_rms_i = i
+    if verbose:
+        print("Residual:", min_rms, "Iteration:", min_rms_i)
     return min_rms_i
 
 
