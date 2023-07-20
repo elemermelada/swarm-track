@@ -1,3 +1,6 @@
+from tudatpy.kernel.numerical_simulation import estimation
+
+
 def create_estimator(
     numerical_simulation,
     bodies,
@@ -11,7 +14,7 @@ def create_estimator(
     return estimator
 
 
-def estimate(estimation, estimator, simulated_observations):
+def estimate(estimator, simulated_observations):
     convergence_checker = estimation.estimation_convergence_checker(
         maximum_iterations=5, number_of_iterations_without_improvement=2
     )

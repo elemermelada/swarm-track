@@ -4,9 +4,11 @@ from tudatpy.kernel import constants
 from tudatpy.kernel.numerical_simulation import environment_setup
 from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 from tudatpy.kernel.interface import spice
+
 from util.environment_setup import add_tw_stations, get_bodies
-from util.observation_setup import create_ow_links
 from util.point_distributions import fibonacci_sphere
+
+from observation.observation_setup import create_ow_links
 
 current_directory = os.getcwd()
 

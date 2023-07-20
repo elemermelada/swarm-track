@@ -1,3 +1,5 @@
+from tudatpy.kernel.interface import spice
+
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,7 +21,6 @@ def scatter_ephemeris(ax: Axes, ephemeris, axis=[1, 2], color="b", linestyle="-"
 
 def plot_trajectory_from_spice(
     ax: Axes,
-    spice,
     body,
     simulation_start_epoch,
     simulation_end_epoch,
@@ -43,7 +44,7 @@ def plot_trajectory_from_spice(
     return plot_ephemeris(ax, ephemeris, axis, color, linestyle)
 
 
-def plot_mars(ax: Axes, spice):
+def plot_mars(ax: Axes):
     radius_mars = spice.get_average_radius("Mars")
     ax.add_patch(
         plt.Circle((0, 0), radius_mars * 1e-3, color="firebrick", label="Mars")

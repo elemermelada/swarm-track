@@ -4,11 +4,7 @@ from tudatpy.kernel import constants
 from tudatpy.kernel.numerical_simulation import environment_setup
 from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 from tudatpy.kernel.interface import spice
-
-from util.environment_setup import add_tw_stations, get_bodies
-from util.point_distributions import fibonacci_sphere
-
-from observation.observation_setup import create_ow_links
+from util.environment_setup import get_bodies
 
 current_directory = os.getcwd()
 
@@ -20,17 +16,13 @@ simulation_start_epoch = 4.0 * constants.JULIAN_YEAR + 1.0 * constants.JULIAN_DA
 simulation_duration = 5.0 * constants.JULIAN_DAY
 simulation_end_epoch = simulation_start_epoch + simulation_duration
 
-tw_number = 10  # No. of TW beacons
+tw_number = 0  # No. of TW beacons
 
 ### CELESTIAL BODIES ###
 bodies = get_bodies(simulation_start_epoch, simulation_end_epoch, environment_setup)
 
 bodies_to_propagate = ["MEX"]
 central_bodies = ["Mars"]
-
-# Add TW stations and create links to MEX
-add_tw_stations(environment_setup, bodies.get("Mars"), tw_number, fibonacci_sphere)
-links = create_ow_links(tw_number, "MEX")
 
 # General observation settings
 light_time_correction_settings = (

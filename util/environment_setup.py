@@ -1,4 +1,5 @@
 from tudatpy.kernel.astro import element_conversion
+from tudatpy.kernel.numerical_simulation import environment_setup
 
 
 def get_bodies(simulation_start_epoch, simulation_end_epoch, environment_setup):
@@ -36,7 +37,7 @@ def get_bodies(simulation_start_epoch, simulation_end_epoch, environment_setup):
     return bodies
 
 
-def add_radiation_pressure(bodies, environment_setup):
+def add_radiation_pressure(bodies):
     # Create radiation pressure settings
     reference_area_radiation = 4.0
     radiation_pressure_coefficient = 1.2

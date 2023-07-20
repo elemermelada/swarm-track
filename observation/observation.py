@@ -1,6 +1,16 @@
+from tudatpy.kernel.numerical_simulation import estimation, estimation_setup
+
+from observation.observation_setup import (
+    create_cart_link,
+    add_observation_simulators,
+    add_simple_cartesian_observation_settings,
+)
+from observation.observation_postprocessing import (
+    retrieve_ephemeris_from_cartesian_observations,
+)
+
+
 def perform_observations(
-    estimation_setup,
-    estimation,
     observation_settings_list,
     bodies,
     observation_simulation_settings,
@@ -21,22 +31,16 @@ def create_cartesian_observations(observation_times, bodies):
     from tudatpy.kernel.numerical_simulation import estimation, estimation_setup
     from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
-    from util.observation_setup import create_cart_link
-
     links = create_cart_link("MEX")
 
     # Add cartesian "sensors"
     TYPE = observation.position_observable_type
-    from util.observation_setup import add_simple_cartesian_observation_settings
 
     observation_settings_list = add_simple_cartesian_observation_settings(
-        observation,
         links,
     )
-    from util.observation_setup import add_observation_simulators
 
     observation_simulation_settings = add_observation_simulators(
-        observation,
         observation_times,
         links,
         TYPE,
@@ -45,15 +49,9 @@ def create_cartesian_observations(observation_times, bodies):
 
     # Create observations
     simulated_observations = perform_observations(
-        estimation_setup,
-        estimation,
         observation_settings_list,
         bodies,
         observation_simulation_settings,
-    )
-
-    from util.observation_postprocessing import (
-        retrieve_ephemeris_from_cartesian_observations,
     )
 
     return retrieve_ephemeris_from_cartesian_observations(simulated_observations)
