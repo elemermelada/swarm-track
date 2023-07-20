@@ -18,7 +18,8 @@
 				"marp-team.marp-vscode",
 				"gruntfuggly.todo-tree",
 				"ms-azuretools.vscode-docker",
-				"eamodio.gitlens"
+				"eamodio.gitlens",
+				"mhutchie.git-graph"
             ]
         }
     }
