@@ -7,7 +7,7 @@ def get_bodies(simulation_start_epoch, simulation_end_epoch, environment_setup):
 
     # Create default body settings for bodies_to_create, with "Mars"/"J2000" as the global frame origin and orientation
     global_frame_origin = "Mars"
-    global_frame_orientation = "ECLIPJ2000"
+    global_frame_orientation = "J2000"
     body_settings = environment_setup.get_default_body_settings(
         bodies_to_create, global_frame_origin, global_frame_orientation
     )

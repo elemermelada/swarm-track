@@ -37,7 +37,7 @@ def basic_propagator(
     initial_state = spice.get_body_cartesian_state_at_epoch(
         target_body_name="MEX",
         observer_body_name="Mars",
-        reference_frame_name="ECLIPJ2000",
+        reference_frame_name="J2000",
         aberration_corrections="none",
         ephemeris_time=simulation_start_epoch,
     )

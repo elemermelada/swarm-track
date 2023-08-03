@@ -58,7 +58,7 @@ def plot_trajectory_from_spice(
             spice.get_body_cartesian_position_at_epoch(
                 target_body_name=body,
                 observer_body_name="Mars",
-                reference_frame_name="ECLIPJ2000",
+                reference_frame_name="J2000",
                 aberration_corrections="none",
                 ephemeris_time=epoch,
             )

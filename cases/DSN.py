@@ -10,13 +10,22 @@ from util.graphs import (
     plot_mars,
     plot_observations,
     plot_trajectory_from_spice,
+    scatter_ephemeris,
 )
 
-from observation.observation_setup import create_simple_2w_doppler_sensors
+from observation.observation_setup import (
+    add_dsn_viability_check,
+    create_simple_1w_doppler_sensors,
+    create_simple_2w_doppler_sensors,
+)
 from observation.observation import perform_observations
 
 from estimation.estimation_setup import create_simple_parameters_to_estimate
-from estimation.estimation import create_estimator, estimate
+from estimation.estimation import (
+    create_estimator,
+    estimate,
+    get_ephemeris_residuals_from_spice,
+)
 from estimation.estimation_postprocessing import retrieve_best_iteration_state_history
 
 from init.MEX_DSN_SHORT import (
@@ -29,7 +38,9 @@ from init.MEX_DSN_SHORT import (
     dsn_antennae_names,
 )
 
-USE_3D = False
+from util.propagation import retrieve_propagated_state_history
+
+USE_3D = True
 
 # Add radiation pressure to environment
 add_radiation_pressure(bodies)
@@ -40,14 +51,23 @@ ax = plot_trajectory_from_spice(
     ax, "MEX", simulation_start_epoch, simulation_end_epoch, axis=[1, 2], threeD=USE_3D
 )
 ax = plot_mars(ax, USE_3D)
-fig.show()
+# fig.show()
 
 # Add doppler "sensors"
 (
     observation_settings_list,
     observation_simulation_settings,
-) = create_simple_2w_doppler_sensors(
-    links, light_time_correction_settings, observation_times
+) = create_simple_1w_doppler_sensors(
+    links,
+    light_time_correction_settings,
+    observation_times,
+    lambda observation_type, elevation_angle, observation_simulation_settings, links: add_dsn_viability_check(
+        observation_type,
+        elevation_angle,
+        observation_simulation_settings,
+        links,
+        dsn_antennae_names,
+    ),
 )
 
 # Create observations
@@ -56,7 +76,6 @@ simulated_observations = perform_observations(
     bodies,
     observation_simulation_settings,
 )
-
 
 fig2, ax2 = init_observation_plot()
 colors = ["b", "r", "g"]
@@ -75,8 +94,21 @@ propagator_settings_estimation = basic_propagator(
     bodies,
     ["MEX"],
     ["Mars"],
-    initial_state_error=0.1,
+    initial_state_error=0.0,
 )
+
+### Propagate to see wassup
+state_history, time_vector = retrieve_propagated_state_history(
+    propagator_settings_estimation, bodies, True
+)
+scatter_ephemeris(ax, state_history * 1e-3, threeD=USE_3D, color="r")
+fig.show()
+
+fig3, ax3 = init_observation_plot()
+residuals = get_ephemeris_residuals_from_spice(state_history, time_vector)
+ax3.plot(time_vector, residuals)
+fig3.show()
+
 parameters_to_estimate = create_simple_parameters_to_estimate(
     propagator_settings_estimation, bodies
 )

@@ -17,6 +17,23 @@ def create_1w_tw_links(tw_number, body):
     return links
 
 
+def create_1w_dsn_links(body, dsn_antennae):
+    links = []
+
+    for antenna in dsn_antennae:
+        one_way_link_ends = dict()
+        one_way_link_ends[
+            observation.transmitter
+        ] = observation.body_reference_point_link_end_id("Mars", antenna)
+        one_way_link_ends[observation.receiver] = observation.body_origin_link_end_id(
+            body
+        )
+        one_way_link_definition = observation.LinkDefinition(one_way_link_ends)
+        links.append(one_way_link_definition)
+
+    return links
+
+
 def create_2w_dsn_links(body, dsn_antennae):
     links = []
     for antenna in dsn_antennae:
@@ -158,8 +175,36 @@ def add_tw_viability_check(
         )
 
 
+def add_dsn_viability_check(
+    observation_type,
+    elevation_angle,
+    observation_simulation_settings,
+    links,
+    dsn_antennae_names,
+):
+    for i in range(len(links)):
+        viability_settings = [
+            # observation.elevation_angle_viability(
+            #     ["Earth", dsn_antennae_names[i]],
+            #     elevation_angle,
+            # ),
+            # observation.body_occultation_viability(
+            #     ["Earth", dsn_antennae_names[i]], "Mars"
+            # ),
+        ]
+        observation.add_viability_check_to_observable_for_link_ends(
+            observation_simulation_settings,
+            viability_settings,
+            observation_type,
+            links[i],
+        )
+
+
 def create_simple_1w_doppler_sensors(
-    links, light_time_correction_settings, observation_times
+    links,
+    light_time_correction_settings,
+    observation_times,
+    add_viability_check_fcn=add_tw_viability_check,
 ):
     observable_type = observation.one_way_instantaneous_doppler_type
     observation_settings_list = add_simple_1w_doppler_observation_settings(
@@ -174,7 +219,7 @@ def create_simple_1w_doppler_sensors(
         observable_type,
         observation_simulation_settings,
     )
-    add_viability_check(
+    add_viability_check_fcn(
         observable_type,
         np.deg2rad(15),
         observation_simulation_settings,
@@ -184,7 +229,10 @@ def create_simple_1w_doppler_sensors(
 
 
 def create_simple_2w_doppler_sensors(
-    links, light_time_correction_settings, observation_times
+    links,
+    light_time_correction_settings,
+    observation_times,
+    add_viability_check_fcn=add_tw_viability_check,
 ):
     observable_type = observation.two_way_instantaneous_doppler_type
     observation_settings_list = add_simple_2w_doppler_observation_settings(
@@ -199,7 +247,7 @@ def create_simple_2w_doppler_sensors(
         observable_type,
         observation_simulation_settings,
     )
-    add_viability_check(
+    add_viability_check_fcn(
         observable_type,
         np.deg2rad(15),
         observation_simulation_settings,
@@ -208,7 +256,12 @@ def create_simple_2w_doppler_sensors(
     return observation_settings_list, observation_simulation_settings
 
 
-def create_2w_doppler_sensors(links, light_time_correction_settings, observation_times):
+def create_2w_doppler_sensors(
+    links,
+    light_time_correction_settings,
+    observation_times,
+    add_viability_check_fcn=add_tw_viability_check,
+):
     observable_type = observation.two_way_instantaneous_doppler_type
     observation_settings_list = add_simple_2w_doppler_observation_settings(
         links,
@@ -222,7 +275,7 @@ def create_2w_doppler_sensors(links, light_time_correction_settings, observation
         observable_type,
         observation_simulation_settings,
     )
-    add_viability_check(
+    add_viability_check_fcn(
         observable_type,
         np.deg2rad(15),
         observation_simulation_settings,
