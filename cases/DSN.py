@@ -1,9 +1,14 @@
+from observation.observation_postprocessing import (
+    retrieve_observations_with_link,
+)
 from util.environment_setup import add_radiation_pressure
 from util.dynamical_models import basic_propagator
 from util.graphs import (
+    init_observation_plot,
     init_trajectory_graph,
     plot_ephemeris,
     plot_mars,
+    plot_observations,
     plot_trajectory_from_spice,
 )
 
@@ -21,6 +26,7 @@ from init.MEX_DSN_SHORT import (
     links,
     light_time_correction_settings,
     observation_times,
+    dsn_antennae_names,
 )
 
 USE_3D = False
@@ -33,7 +39,8 @@ ax, fig = init_trajectory_graph(threeD=USE_3D)
 ax = plot_trajectory_from_spice(
     ax, "MEX", simulation_start_epoch, simulation_end_epoch, axis=[1, 2], threeD=USE_3D
 )
-ax = plot_mars(ax)
+ax = plot_mars(ax, USE_3D)
+fig.show()
 
 # Add doppler "sensors"
 (
@@ -49,6 +56,17 @@ simulated_observations = perform_observations(
     bodies,
     observation_simulation_settings,
 )
+
+
+fig2, ax2 = init_observation_plot()
+colors = ["b", "r", "g"]
+for i in range(3):
+    filtered_observations = retrieve_observations_with_link(simulated_observations, i)
+    plot_observations(
+        ax2, filtered_observations, start_date=simulation_start_epoch, color=colors[i]
+    )
+
+fig2.show()
 
 # Estimate
 propagator_settings_estimation = basic_propagator(

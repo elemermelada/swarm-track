@@ -140,7 +140,7 @@ def add_noise(noise_level, observation_type, observation_simulation_settings):
     )
 
 
-def add_viability_check(
+def add_tw_viability_check(
     observation_type,
     elevation_angle,
     observation_simulation_settings,
@@ -231,6 +231,29 @@ def create_2w_doppler_sensors(links, light_time_correction_settings, observation
     return observation_settings_list, observation_simulation_settings
 
 
+def create_2w_doppler_sensors(links, light_time_correction_settings, observation_times):
+    observable_type = observation.two_way_instantaneous_doppler_type
+    observation_settings_list = add_simple_2w_doppler_observation_settings(
+        links,
+        light_time_correction_settings=light_time_correction_settings,
+    )
+    observation_simulation_settings = add_observation_simulators(
+        observation_times, links, observable_type
+    )
+    add_noise(
+        1.0e-3,
+        observable_type,
+        observation_simulation_settings,
+    )
+    add_tw_viability_check(
+        observable_type,
+        np.deg2rad(15),
+        observation_simulation_settings,
+        links,
+    )
+    return observation_settings_list, observation_simulation_settings
+
+
 def create_simple_1w_range_sensors(
     links, light_time_correction_settings, observation_times
 ):
@@ -249,7 +272,7 @@ def create_simple_1w_range_sensors(
         observable_type,
         observation_simulation_settings,
     )
-    add_viability_check(
+    add_tw_viability_check(
         observable_type,
         np.deg2rad(15),
         observation_simulation_settings,
