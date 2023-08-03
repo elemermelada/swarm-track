@@ -93,3 +93,16 @@ def init_trajectory_graph(threeD=False):
     ax.ticklabel_format(style="sci", scilimits=(0, 0), axis="both")
 
     return (ax, fig)
+
+
+def init_observation_plot():
+    fig, ax = plt.subplots(1, 1, figsize=(9, 6))
+    return fig, ax
+
+
+def plot_observations(ax: Axes, observations_object, start_date, color="b"):
+    observations = observations_object["concatenated_observations"]
+    times = observations_object["concatenated_times"]
+    times = (times - start_date) / 86400
+    ax.scatter(times, observations, color=color)
+    ax.set_xlabel("Time (days)")
