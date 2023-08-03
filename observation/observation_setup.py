@@ -24,7 +24,7 @@ def create_1w_dsn_links(body, dsn_antennae):
         one_way_link_ends = dict()
         one_way_link_ends[
             observation.transmitter
-        ] = observation.body_reference_point_link_end_id("Mars", antenna)
+        ] = observation.body_reference_point_link_end_id("Earth", antenna)
         one_way_link_ends[observation.receiver] = observation.body_origin_link_end_id(
             body
         )
