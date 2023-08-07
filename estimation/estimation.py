@@ -42,12 +42,19 @@ def get_ephemeris_residuals_from_spice(propagated_state, time_vector):
         s_vector = np.cross(w_vector, r_vector)
         s_vector = s_vector / np.linalg.norm(s_vector)
 
-        return [np.dot(v, r_vector), np.dot(v, s_vector), np.dot(v, w_vector)]
+        return [
+            # np.dot(v[0:3], r_vector),
+            # np.dot(v[0:3], s_vector),
+            # np.dot(v[0:3], w_vector),
+            np.dot(v[3:6], r_vector),
+            np.dot(v[3:6], s_vector),
+            np.dot(v[3:6], w_vector),
+        ]
 
     return [
         transform_vector(
-            propagated_state[i, 0:3]
-            - spice.get_body_cartesian_position_at_epoch(
+            propagated_state[i]
+            - spice.get_body_cartesian_state_at_epoch(
                 target_body_name="MEX",
                 observer_body_name="Mars",
                 reference_frame_name="J2000",

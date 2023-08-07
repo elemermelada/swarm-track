@@ -20,7 +20,10 @@ from observation.observation_setup import (
 )
 from observation.observation import perform_observations
 
-from estimation.estimation_setup import create_simple_parameters_to_estimate
+from estimation.estimation_setup import (
+    create_gravimetry_parameters_to_estimate,
+    create_simple_parameters_to_estimate,
+)
 from estimation.estimation import (
     create_estimator,
     estimate,
@@ -28,7 +31,7 @@ from estimation.estimation import (
 )
 from estimation.estimation_postprocessing import retrieve_best_iteration_state_history
 
-from init.MEX_DSN_SHORT import (
+from init.MEX_DSN import (
     bodies,
     simulation_start_epoch,
     simulation_end_epoch,
@@ -86,6 +89,7 @@ for i in range(3):
     )
 
 fig2.show()
+fig2.savefig("out/2way.png")
 
 # Estimate
 propagator_settings_estimation = basic_propagator(
@@ -109,7 +113,7 @@ residuals = get_ephemeris_residuals_from_spice(state_history, time_vector)
 ax3.plot(time_vector, residuals)
 fig3.show()
 
-parameters_to_estimate = create_simple_parameters_to_estimate(
+parameters_to_estimate = create_gravimetry_parameters_to_estimate(
     propagator_settings_estimation, bodies
 )
 estimator = create_estimator(

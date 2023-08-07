@@ -1,8 +1,11 @@
 from tudatpy.kernel.astro import element_conversion
 from tudatpy.kernel.numerical_simulation import environment_setup
+import numpy as np
 
 
-def get_bodies(simulation_start_epoch, simulation_end_epoch, environment_setup):
+def get_bodies(
+    simulation_start_epoch, simulation_end_epoch, environment_setup, estimate_mars=None
+):
     bodies_to_create = ["Mars", "Phobos", "Deimos", "Sun", "Jupiter", "Earth"]
 
     # Create default body settings for bodies_to_create, with "Mars"/"J2000" as the global frame origin and orientation
@@ -27,12 +30,31 @@ def get_bodies(simulation_start_epoch, simulation_end_epoch, environment_setup):
         # interpolator_settings = None,
     )
 
+    # Set mars gravitational coefficients to 0 if desired
+    if not estimate_mars == None:
+        original_settings = body_settings.get("Mars").gravity_field_settings
+
+        normalized_cosine_coefficients = (
+            original_settings.normalized_cosine_coefficients[
+                0 : estimate_mars[0], 0 : estimate_mars[1]
+            ]
+        )
+
+        normalized_sine_coefficients = original_settings.normalized_sine_coefficients[
+            0 : estimate_mars[0], 0 : estimate_mars[1]
+        ]
+
+        body_settings.get(
+            "Mars"
+        ).gravity_field_settings = environment_setup.gravity_field.spherical_harmonic(
+            original_settings.gravitational_parameter,
+            original_settings.reference_radius,
+            normalized_cosine_coefficients,
+            normalized_sine_coefficients,
+            original_settings.associated_reference_frame,
+        )
     # Create system of bodies
     bodies = environment_setup.create_system_of_bodies(body_settings)
-
-    ### VEHICLE BODY ###
-    # Create vehicle object
-    # bodies.create_empty_body("MEX")
     bodies.get("MEX").mass = 1000.0
     return bodies
 

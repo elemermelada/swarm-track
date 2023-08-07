@@ -16,25 +16,25 @@ def create_gravimetry_parameters_to_estimate(propagator_settings_estimation, bod
     parameter_settings = estimation_setup.parameter.initial_states(
         propagator_settings_estimation, bodies
     )
-    parameter_settings.append(
-        estimation_setup.parameter.spherical_harmonics_c_coefficients(
-            "Mars",
-            minimum_degree=0,
-            minimum_order=0,
-            maximum_degree=4,
-            maximum_order=4,
-        )
-    )
+    # parameter_settings.append(
+    #     estimation_setup.parameter.spherical_harmonics_c_coefficients(
+    #         "Mars",
+    #         minimum_degree=2,
+    #         minimum_order=0,
+    #         maximum_degree=2,
+    #         maximum_order=2,
+    #     )
+    # )
 
-    parameter_settings.append(
-        estimation_setup.parameter.spherical_harmonics_s_coefficients(
-            "Mars",
-            minimum_degree=0,
-            minimum_order=0,
-            maximum_degree=4,
-            maximum_order=4,
-        )
-    )
+    # parameter_settings.append(
+    #     estimation_setup.parameter.spherical_harmonics_s_coefficients(
+    #         "Mars",
+    #         minimum_degree=2,
+    #         minimum_order=0,
+    #         maximum_degree=2,
+    #         maximum_order=2,
+    #     )
+    # )
 
     parameters_to_estimate = estimation_setup.create_parameter_set(
         parameter_settings, bodies

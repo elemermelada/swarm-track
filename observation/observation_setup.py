@@ -89,7 +89,7 @@ def add_simple_2w_doppler_observation_settings(
     )
     for link in links:
         observation_settings_list.append(
-            observation.two_doppler_instantaneous(
+            observation.two_way_doppler_averaged(
                 link,
                 light_time_correction_settings=[light_time_correction_settings],
             )

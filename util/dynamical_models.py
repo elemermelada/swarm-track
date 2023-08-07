@@ -48,8 +48,6 @@ def basic_propagator(
             1 + np.ones(len(initial_state)) * initial_state_error,
         )
 
-    print(initial_state)
-
     integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step_size(
         initial_time_step=60.0,
         coefficient_set=propagation_setup.integrator.CoefficientSets.rkdp_87,

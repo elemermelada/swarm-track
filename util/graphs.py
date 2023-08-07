@@ -4,6 +4,8 @@ from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
 
+import json
+
 
 def plot_ephemeris(
     ax: Axes, ephemeris, axis=[1, 2], threeD=False, color="b", linestyle="-"
@@ -15,10 +17,15 @@ def plot_ephemeris(
             ephemeris[:, 2],
             color=color,
             linestyle=linestyle,
+            marker=".",
         )
         return ax
     ax.plot(
-        ephemeris[:, axis[0]], ephemeris[:, axis[1]], color=color, linestyle=linestyle
+        ephemeris[:, axis[0]],
+        ephemeris[:, axis[1]],
+        color=color,
+        linestyle=linestyle,
+        marker=".",
     )
     return ax
 
@@ -53,6 +60,7 @@ def plot_trajectory_from_spice(
 ):
     time2plt = np.arange(simulation_start_epoch, simulation_end_epoch, 60)
     ephemeris = list()
+    ephemeris_dict = dict()
     for epoch in time2plt:
         ephemeris.append(
             spice.get_body_cartesian_position_at_epoch(
@@ -63,7 +71,12 @@ def plot_trajectory_from_spice(
                 ephemeris_time=epoch,
             )
         )
+        ephemeris_dict[epoch] = (ephemeris[-1] * 1e-3).tolist()
     ephemeris = np.array(ephemeris) * 1e-3
+
+    with open("out/spice.json", "w") as outfile:
+        outfile.write(json.dumps(ephemeris_dict))
+
     return plot_ephemeris(ax, ephemeris, axis, threeD, color, linestyle)
 
 
