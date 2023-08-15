@@ -205,6 +205,7 @@ def create_simple_1w_doppler_sensors(
     light_time_correction_settings,
     observation_times,
     add_viability_check_fcn=add_tw_viability_check,
+    noise=1.0e-3,
 ):
     observable_type = observation.one_way_instantaneous_doppler_type
     observation_settings_list = add_simple_1w_doppler_observation_settings(
@@ -214,18 +215,19 @@ def create_simple_1w_doppler_sensors(
     observation_simulation_settings = add_observation_simulators(
         observation_times, links, observable_type
     )
-    add_noise(
-        1.0e-3,
-        observable_type,
-        observation_simulation_settings,
-    )
+    if noise:
+        add_noise(
+            noise,
+            observable_type,
+            observation_simulation_settings,
+        )
     add_viability_check_fcn(
         observable_type,
         np.deg2rad(15),
         observation_simulation_settings,
         links,
     )
-    return observation_settings_list, observation_simulation_settings
+    return observation_settings_list, observation_simulation_settings, observable_type
 
 
 def create_simple_2w_doppler_sensors(

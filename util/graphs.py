@@ -108,14 +108,16 @@ def init_trajectory_graph(threeD=False):
     return (ax, fig)
 
 
-def init_observation_plot():
-    fig, ax = plt.subplots(1, 1, figsize=(9, 6))
-    return fig, ax
+def init_observation_plot(n_axes=3):
+    rows = int(np.ceil(np.sqrt(n_axes)))
+    fig, axes = plt.subplots(rows, rows, figsize=(9, 6))
+    axes = axes.reshape(rows * rows)
+    return fig, axes
 
 
-def plot_observations(ax: Axes, observations_object, start_date, color="b"):
-    observations = observations_object["concatenated_observations"]
-    times = observations_object["concatenated_times"]
+def plot_observations(ax: Axes, observations_object: dict, start_date, color="b"):
+    observations = observations_object.values()
+    times = np.array(list(observations_object.keys()))
     times = (times - start_date) / 86400
     ax.scatter(times, observations, color=color)
     ax.set_xlabel("Time (days)")

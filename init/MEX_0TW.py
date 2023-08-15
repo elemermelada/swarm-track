@@ -19,7 +19,7 @@ simulation_end_epoch = simulation_start_epoch + simulation_duration
 tw_number = 0  # No. of TW beacons
 
 ### CELESTIAL BODIES ###
-bodies = get_bodies(simulation_start_epoch, simulation_end_epoch, environment_setup)
+bodies = get_bodies(simulation_start_epoch, simulation_end_epoch)
 
 bodies_to_propagate = ["MEX"]
 central_bodies = ["Mars"]

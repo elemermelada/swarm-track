@@ -73,6 +73,9 @@ ax = plot_mars(ax, USE_3D)
     ),
 )
 
+# Update trajectory using dynamical model
+
+
 # Create observations
 simulated_observations = perform_observations(
     observation_settings_list,

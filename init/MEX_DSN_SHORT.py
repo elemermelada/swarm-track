@@ -21,7 +21,7 @@ simulation_duration = 2.0 * constants.JULIAN_DAY
 simulation_end_epoch = simulation_start_epoch + simulation_duration
 
 ### CELESTIAL BODIES ###
-bodies = get_bodies(simulation_start_epoch, simulation_end_epoch, environment_setup)
+bodies = get_bodies(simulation_start_epoch, simulation_end_epoch)
 
 bodies_to_propagate = ["MEX"]
 central_bodies = ["Mars"]

@@ -11,9 +11,15 @@ def basic_propagator(
     bodies_to_propagate,
     central_bodies,
     initial_state_error=None,
+    override_initial_state=None,
+    gravity_order=4,
 ):
     accelerations_settings_mars_express_estimation = dict(
-        Mars=[propagation_setup.acceleration.spherical_harmonic_gravity(4, 4)],
+        Mars=[
+            propagation_setup.acceleration.spherical_harmonic_gravity(
+                gravity_order, gravity_order
+            )
+        ],
         Phobos=[propagation_setup.acceleration.point_mass_gravity()],
         Deimos=[propagation_setup.acceleration.point_mass_gravity()],
         Earth=[propagation_setup.acceleration.point_mass_gravity()],
@@ -34,13 +40,15 @@ def basic_propagator(
     )
 
     # Obtain an initial state
-    initial_state = spice.get_body_cartesian_state_at_epoch(
-        target_body_name="MEX",
-        observer_body_name="Mars",
-        reference_frame_name="J2000",
-        aberration_corrections="none",
-        ephemeris_time=simulation_start_epoch,
-    )
+    initial_state = override_initial_state
+    if initial_state is None:
+        initial_state = spice.get_body_cartesian_state_at_epoch(
+            target_body_name="MEX",
+            observer_body_name="Mars",
+            reference_frame_name="J2000",
+            aberration_corrections="none",
+            ephemeris_time=simulation_start_epoch,
+        )
 
     if not initial_state_error is None:
         initial_state = np.multiply(

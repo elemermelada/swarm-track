@@ -33,7 +33,7 @@ def estimate(estimator, simulated_observations, max_iters=5):
     return estimation_output
 
 
-def get_ephemeris_residuals_from_spice(propagated_state, time_vector):
+def get_ephemeris_residuals_from_spice(propagated_state, time_vector, velocity=True):
     def transform_vector(v, state):
         r_vector = state[0:3] / np.linalg.norm(state)
         v_vector = state[3:6]
@@ -42,13 +42,17 @@ def get_ephemeris_residuals_from_spice(propagated_state, time_vector):
         s_vector = np.cross(w_vector, r_vector)
         s_vector = s_vector / np.linalg.norm(s_vector)
 
+        if velocity:
+            return [
+                np.dot(v[3:6], r_vector),
+                np.dot(v[3:6], s_vector),
+                np.dot(v[3:6], w_vector),
+            ]
+
         return [
-            # np.dot(v[0:3], r_vector),
-            # np.dot(v[0:3], s_vector),
-            # np.dot(v[0:3], w_vector),
-            np.dot(v[3:6], r_vector),
-            np.dot(v[3:6], s_vector),
-            np.dot(v[3:6], w_vector),
+            np.dot(v[0:3], r_vector),
+            np.dot(v[0:3], s_vector),
+            np.dot(v[0:3], w_vector),
         ]
 
     return [

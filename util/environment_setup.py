@@ -4,7 +4,9 @@ import numpy as np
 
 
 def get_bodies(
-    simulation_start_epoch, simulation_end_epoch, environment_setup, estimate_mars=None
+    simulation_start_epoch,
+    simulation_end_epoch,
+    override_mars_harmonics=None,
 ):
     bodies_to_create = ["Mars", "Phobos", "Deimos", "Sun", "Jupiter", "Earth"]
 
@@ -14,6 +16,8 @@ def get_bodies(
     body_settings = environment_setup.get_default_body_settings(
         bodies_to_create, global_frame_origin, global_frame_orientation
     )
+    # original_settings = body_settings.get("Mars").gravity_field_settings
+
     body_settings.add_empty_settings("MEX")
     spice_ephemeris_settings = environment_setup.ephemeris.direct_spice(
         frame_origin=global_frame_origin,
@@ -30,29 +34,47 @@ def get_bodies(
         # interpolator_settings = None,
     )
 
-    # Set mars gravitational coefficients to 0 if desired
-    if not estimate_mars == None:
+    # Override mars gravitational coefficients
+    if not override_mars_harmonics is None:
         original_settings = body_settings.get("Mars").gravity_field_settings
+        final_settings = override_mars_harmonics
 
-        normalized_cosine_coefficients = (
-            original_settings.normalized_cosine_coefficients[
-                0 : estimate_mars[0], 0 : estimate_mars[1]
-            ]
-        )
+        # Cosine coefficients
+        for i in range(len(override_mars_harmonics["normalized_cosine_coefficients"])):
+            for j in range(
+                len(override_mars_harmonics["normalized_cosine_coefficients"][i])
+            ):
+                if (
+                    override_mars_harmonics["normalized_cosine_coefficients"][i][j]
+                    is None
+                ):
+                    final_settings["normalized_cosine_coefficients"][i][
+                        j
+                    ] = original_settings.normalized_cosine_coefficients[i][j]
 
-        normalized_sine_coefficients = original_settings.normalized_sine_coefficients[
-            0 : estimate_mars[0], 0 : estimate_mars[1]
-        ]
+        # Sine coefficients
+        for i in range(len(override_mars_harmonics["normalized_sine_coefficients"])):
+            for j in range(
+                len(override_mars_harmonics["normalized_sine_coefficients"][i])
+            ):
+                if (
+                    override_mars_harmonics["normalized_sine_coefficients"][i][j]
+                    is None
+                ):
+                    final_settings["normalized_sine_coefficients"][i][
+                        j
+                    ] = original_settings.normalized_sine_coefficients[i][j]
 
         body_settings.get(
             "Mars"
         ).gravity_field_settings = environment_setup.gravity_field.spherical_harmonic(
             original_settings.gravitational_parameter,
             original_settings.reference_radius,
-            normalized_cosine_coefficients,
-            normalized_sine_coefficients,
+            final_settings["normalized_cosine_coefficients"],
+            final_settings["normalized_sine_coefficients"],
             original_settings.associated_reference_frame,
         )
+        m = body_settings.get("Mars").gravity_field_settings
     # Create system of bodies
     bodies = environment_setup.create_system_of_bodies(body_settings)
     bodies.get("MEX").mass = 1000.0

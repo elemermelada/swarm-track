@@ -21,15 +21,13 @@ spice.load_kernel(current_directory + "/kernels/ORMM_T19_040401000000_00072.BSP"
 
 # Set simulation start (January 1st, 2004 - 00:00) and end epochs (January 11th, 2004 - 00:00)
 simulation_start_epoch = 4.0 * constants.JULIAN_YEAR + 100.0 * constants.JULIAN_DAY
-simulation_duration = 5.0 * constants.JULIAN_DAY
+simulation_duration = 20.0 * constants.JULIAN_DAY
 simulation_end_epoch = simulation_start_epoch + simulation_duration
 
 ### CELESTIAL BODIES ###
 bodies = get_bodies(
     simulation_start_epoch,
     simulation_end_epoch,
-    environment_setup,
-    estimate_mars=(4 + 1, 4 + 1),
 )
 
 bodies_to_propagate = ["MEX"]
@@ -62,4 +60,4 @@ links = create_1w_dsn_links("MEX", dsn_antennae_names)
 light_time_correction_settings = (
     observation.first_order_relativistic_light_time_correction(["Sun"])
 )
-observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 3600.0)
+observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 300.0)
