@@ -6,7 +6,7 @@ from optimization.optimizers import (
     SLSQPOptimizer,
     TrustRegionOptimizer,
 )
-from util.environment_setup import add_radiation_pressure, get_bodies
+from util.environment_setup import add_radiation_pressure, add_tw_stations, get_bodies
 from util.dynamical_models import basic_propagator
 from util.graphs import (
     init_observation_plot,
@@ -19,8 +19,8 @@ from util.graphs import (
 )
 
 from observation.observation_setup import (
-    add_dsn_viability_check,
-    create_1w_dsn_links,
+    add_tw_viability_check,
+    create_1w_tw_links,
     create_simple_1w_doppler_sensors,
     create_simple_2w_doppler_sensors,
 )
@@ -37,13 +37,14 @@ from estimation.estimation import (
 )
 from estimation.estimation_postprocessing import retrieve_best_iteration_state_history
 
-from init.MEX_DSN import (
+from init.MEX_10TW import (
     simulation_start_epoch,
     simulation_end_epoch,
     observation_times,
-    dsn_antennae_names,
+    tw_number,
 )
 from util.math import observations_rms, vector_rms
+from util.point_distributions import fibonacci_sphere
 
 from util.propagation import retrieve_propagated_state_history
 
@@ -96,30 +97,14 @@ def simulate_observations(
     )
     # TODO - refactor this pls
     # Add TW stations and create links to MEX
-    dsn_antennae_names = [
-        # "DSS-13",
-        "DSS-14",
-        # "DSS-15",
-        # "DSS-24",
-        # "DSS-25",
-        # "DSS-26",
-        # "DSS-34",
-        # "DSS-35",
-        # "DSS-36",
-        "DSS-43",
-        # "DSS-45",
-        # "DSS-54",
-        # "DSS-55",
-        "DSS-63",
-        # "DSS-65",
-    ]
+
     from tudatpy.kernel.numerical_simulation import environment_setup
     from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
-    stations = environment_setup.ground_station.dsn_stations()
-    for station in stations:
-        environment_setup.add_ground_station(new_bodies.get_body("Earth"), station)
-    links = create_1w_dsn_links("MEX", dsn_antennae_names)
+    add_tw_stations(
+        environment_setup, new_bodies.get("Mars"), tw_number, fibonacci_sphere
+    )
+    links = create_1w_tw_links(tw_number, "MEX")
 
     # General observation settings
     light_time_correction_settings = (
@@ -136,12 +121,11 @@ def simulate_observations(
         links,
         light_time_correction_settings,
         observation_times,
-        lambda observation_type, elevation_angle, observation_simulation_settings, links: add_dsn_viability_check(
+        lambda observation_type, elevation_angle, observation_simulation_settings, links: add_tw_viability_check(
             observation_type,
             elevation_angle,
             observation_simulation_settings,
             links,
-            dsn_antennae_names,
         ),
         noise=0.0,
     )
@@ -187,11 +171,11 @@ def simulate_observations(
 simulated_observations = simulate_observations(None)
 
 
-fig2, axes = init_observation_plot()
+fig2, axes = init_observation_plot(n_axes=tw_number)
 
 
 def show_obs(sim_obs, axes, color):
-    for i in range(3):
+    for i in range(tw_number):
         filtered_observations = sim_obs[i]
         plot_observations(
             axes[i],
@@ -225,7 +209,7 @@ fig2.show()
 original_observations = simulated_observations
 
 
-res = GeneticOptimizer(
+res = TrustRegionOptimizer(
     lambda x: observations_rms(
         simulate_observations(None, premultiplied_mars_harmonics=(x), verbose=True),
         original_observations,

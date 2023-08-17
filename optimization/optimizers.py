@@ -40,7 +40,8 @@ def GeneticOptimizer(f, x0, l_bound, u_bound):
         f,
         bounds,
         disp=True,
-        callback=lambda xk, convergence: print("Best:", xk),
-        workers=4,
+        callback=lambda xk, convergence: print("Best:", np.array(xk) * 1e-3),
+        popsize=5,  # This is confusing
+        # workers=4,
     )
     return res

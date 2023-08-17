@@ -19,20 +19,20 @@ def get_bodies(
     # original_settings = body_settings.get("Mars").gravity_field_settings
 
     body_settings.add_empty_settings("MEX")
-    spice_ephemeris_settings = environment_setup.ephemeris.direct_spice(
-        frame_origin=global_frame_origin,
-        frame_orientation=global_frame_orientation,
-        body_name_to_use="MEX",
-    )
-    body_settings.get(
-        "MEX"
-    ).ephemeris_settings = environment_setup.ephemeris.tabulated_from_existing(
-        ephemeris_settings=spice_ephemeris_settings,
-        start_time=simulation_start_epoch,
-        end_time=simulation_end_epoch,
-        time_step=60,
-        # interpolator_settings = None,
-    )
+    # spice_ephemeris_settings = environment_setup.ephemeris.direct_spice(
+    #     frame_origin=global_frame_origin,
+    #     frame_orientation=global_frame_orientation,
+    #     body_name_to_use="MEX",
+    # )
+    # body_settings.get(
+    #     "MEX"
+    # ).ephemeris_settings = environment_setup.ephemeris.tabulated_from_existing(
+    #     ephemeris_settings=spice_ephemeris_settings,
+    #     start_time=simulation_start_epoch,
+    #     end_time=simulation_end_epoch,
+    #     time_step=60,
+    #     # interpolator_settings = None,
+    # )
 
     # Override mars gravitational coefficients
     if not override_mars_harmonics is None:
@@ -74,7 +74,6 @@ def get_bodies(
             final_settings["normalized_sine_coefficients"],
             original_settings.associated_reference_frame,
         )
-        m = body_settings.get("Mars").gravity_field_settings
     # Create system of bodies
     bodies = environment_setup.create_system_of_bodies(body_settings)
     bodies.get("MEX").mass = 1000.0

@@ -12,6 +12,9 @@ if RUN_APP.upper() == "MEX1":
 if RUN_APP.upper() == "MEX2":
     from cases.TW_SIMPLE_RANGE import *
 
+if RUN_APP.upper() == "MEX3":
+    from cases.TW_PROP import *
+
 if RUN_APP.upper() == "CART":
     from cases.CART import *
 
