@@ -7,6 +7,7 @@ def get_bodies(
     simulation_start_epoch,
     simulation_end_epoch,
     override_mars_harmonics=None,
+    extra_body=None,
 ):
     bodies_to_create = ["Mars", "Phobos", "Deimos", "Sun", "Jupiter", "Earth"]
 
@@ -18,7 +19,10 @@ def get_bodies(
     )
     # original_settings = body_settings.get("Mars").gravity_field_settings
 
-    body_settings.add_empty_settings("MEX")
+    if extra_body is None:
+        body_settings.add_empty_settings("MEX")
+    else:
+        body_settings.add_empty_settings(extra_body["name"])
     # spice_ephemeris_settings = environment_setup.ephemeris.direct_spice(
     #     frame_origin=global_frame_origin,
     #     frame_orientation=global_frame_orientation,
@@ -76,11 +80,14 @@ def get_bodies(
         )
     # Create system of bodies
     bodies = environment_setup.create_system_of_bodies(body_settings)
-    bodies.get("MEX").mass = 1000.0
+    if extra_body is None:
+        bodies.get("MEX").mass = 1000.0
+    else:
+        bodies.get(extra_body["name"]).mass = 1000.0
     return bodies
 
 
-def add_radiation_pressure(bodies):
+def add_radiation_pressure(bodies, extra_body=None):
     # Create radiation pressure settings
     reference_area_radiation = 4.0
     radiation_pressure_coefficient = 1.2
@@ -93,7 +100,9 @@ def add_radiation_pressure(bodies):
     )
     # Add the radiation pressure interface to the environment
     environment_setup.add_radiation_pressure_interface(
-        bodies, "MEX", radiation_pressure_settings
+        bodies,
+        "MEX" if extra_body is None else extra_body["name"],
+        radiation_pressure_settings,
     )
 
 

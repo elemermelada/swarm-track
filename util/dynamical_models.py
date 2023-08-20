@@ -20,18 +20,18 @@ def basic_propagator(
                 gravity_order, gravity_order
             )
         ],
-        Phobos=[propagation_setup.acceleration.point_mass_gravity()],
-        Deimos=[propagation_setup.acceleration.point_mass_gravity()],
-        Earth=[propagation_setup.acceleration.point_mass_gravity()],
-        Jupiter=[propagation_setup.acceleration.point_mass_gravity()],
-        Sun=[
-            propagation_setup.acceleration.point_mass_gravity(),
-            propagation_setup.acceleration.cannonball_radiation_pressure(),
-        ],
+        # Phobos=[propagation_setup.acceleration.point_mass_gravity()],
+        # Deimos=[propagation_setup.acceleration.point_mass_gravity()],
+        # Earth=[propagation_setup.acceleration.point_mass_gravity()],
+        # Jupiter=[propagation_setup.acceleration.point_mass_gravity()],
+        # Sun=[
+        #     propagation_setup.acceleration.point_mass_gravity(),
+        #     # propagation_setup.acceleration.cannonball_radiation_pressure(),
+        # ],
     )
     # Create updated global accelerations dictionary
     acceleration_settings_estimation = {
-        "MEX": accelerations_settings_mars_express_estimation
+        bodies_to_propagate[0]: accelerations_settings_mars_express_estimation
     }
 
     # Create updated acceleration models
@@ -43,7 +43,7 @@ def basic_propagator(
     initial_state = override_initial_state
     if initial_state is None:
         initial_state = spice.get_body_cartesian_state_at_epoch(
-            target_body_name="MEX",
+            target_body_name=bodies_to_propagate[0],
             observer_body_name="Mars",
             reference_frame_name="J2000",
             aberration_corrections="none",

@@ -6,6 +6,9 @@ if RUN_APP.upper() == "DSN1":
 if RUN_APP.upper() == "DSN2":
     from cases.DSN_PROP import *
 
+if RUN_APP.upper() == "DSN3":
+    from cases.DSN_SENS import *
+
 if RUN_APP.upper() == "MEX1":
     from cases.TW_SIMPLE_DOPPLER import *
 

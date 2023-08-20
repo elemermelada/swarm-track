@@ -111,13 +111,21 @@ def init_trajectory_graph(threeD=False):
 def init_observation_plot(n_axes=3):
     rows = int(np.ceil(np.sqrt(n_axes)))
     fig, axes = plt.subplots(rows, rows, figsize=(9, 6))
+    if n_axes == 1:
+        return fig, [axes]
+
     axes = axes.reshape(rows * rows)
     return fig, axes
 
 
-def plot_observations(ax: Axes, observations_object: dict, start_date, color="b"):
+def plot_observations(
+    ax: Axes, observations_object: dict, start_date, color="b", scatter=True
+):
     observations = observations_object.values()
     times = np.array(list(observations_object.keys()))
     times = (times - start_date) / 86400
-    ax.scatter(times, observations, color=color)
+    if scatter:
+        ax.plot(times, observations, "x", color=color, zorder=2.5, markersize=4)
+    else:
+        ax.plot(times, observations, "o-", color=color, markersize=3)
     ax.set_xlabel("Time (days)")
