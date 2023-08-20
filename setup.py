@@ -1,15 +1,26 @@
-RUN_APP = input("Input case: ")
+executed = False
+defaulting = False
+default = None
 
-if RUN_APP.upper() == "DSN1":
-    from cases.DSN1 import *
+while not executed:
+    RUN_APP = default
+    if not defaulting:
+        RUN_APP = input("Input case: ")
 
-if RUN_APP.upper() == "MEX1":
-    from cases.TW_SIMPLE_DOPPLER import *
+    if RUN_APP.upper() == "DSN1":
+        executed = True
+        from cases.DSN_SENS import *
 
-if RUN_APP.upper() == "MEX2":
-    from cases.TW_SIMPLE_RANGE import *
+    if RUN_APP.upper() == "TW1":
+        executed = True
+        from cases.TW_SENS import *
 
-if RUN_APP.upper() == "CART":
-    from cases.CART import *
+    if not executed:
+        if default is None:
+            print("Add a default case first")
+            continue
+        print("Running default case:", default)
+        defaulting = True
+
 
 print("Add breakpoint here to hold plots")

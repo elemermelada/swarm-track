@@ -19,7 +19,7 @@ from util.graphs import (
 
 from observation.observation import create_cartesian_observations
 
-from init.MEX0TWSHORT import (
+from init.MEX_0TW_SHORT import (
     bodies,
     simulation_start_epoch,
     simulation_end_epoch,

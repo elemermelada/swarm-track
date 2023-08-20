@@ -11,21 +11,27 @@ def basic_propagator(
     bodies_to_propagate,
     central_bodies,
     initial_state_error=None,
+    override_initial_state=None,
+    gravity_order=4,
 ):
     accelerations_settings_mars_express_estimation = dict(
-        Mars=[propagation_setup.acceleration.spherical_harmonic_gravity(4, 4)],
-        Phobos=[propagation_setup.acceleration.point_mass_gravity()],
-        Deimos=[propagation_setup.acceleration.point_mass_gravity()],
-        Earth=[propagation_setup.acceleration.point_mass_gravity()],
-        Jupiter=[propagation_setup.acceleration.point_mass_gravity()],
-        Sun=[
-            propagation_setup.acceleration.point_mass_gravity(),
-            propagation_setup.acceleration.cannonball_radiation_pressure(),
+        Mars=[
+            propagation_setup.acceleration.spherical_harmonic_gravity(
+                gravity_order, gravity_order
+            )
         ],
+        # Phobos=[propagation_setup.acceleration.point_mass_gravity()],
+        # Deimos=[propagation_setup.acceleration.point_mass_gravity()],
+        # Earth=[propagation_setup.acceleration.point_mass_gravity()],
+        # Jupiter=[propagation_setup.acceleration.point_mass_gravity()],
+        # Sun=[
+        #     propagation_setup.acceleration.point_mass_gravity(),
+        #     # propagation_setup.acceleration.cannonball_radiation_pressure(),
+        # ],
     )
     # Create updated global accelerations dictionary
     acceleration_settings_estimation = {
-        "MEX": accelerations_settings_mars_express_estimation
+        bodies_to_propagate[0]: accelerations_settings_mars_express_estimation
     }
 
     # Create updated acceleration models
@@ -34,21 +40,21 @@ def basic_propagator(
     )
 
     # Obtain an initial state
-    initial_state = spice.get_body_cartesian_state_at_epoch(
-        target_body_name="MEX",
-        observer_body_name="Mars",
-        reference_frame_name="ECLIPJ2000",
-        aberration_corrections="none",
-        ephemeris_time=simulation_start_epoch,
-    )
+    initial_state = override_initial_state
+    if initial_state is None:
+        initial_state = spice.get_body_cartesian_state_at_epoch(
+            target_body_name=bodies_to_propagate[0],
+            observer_body_name="Mars",
+            reference_frame_name="J2000",
+            aberration_corrections="none",
+            ephemeris_time=simulation_start_epoch,
+        )
 
     if not initial_state_error is None:
         initial_state = np.multiply(
             initial_state,
             1 + np.ones(len(initial_state)) * initial_state_error,
         )
-
-    print(initial_state)
 
     integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step_size(
         initial_time_step=60.0,

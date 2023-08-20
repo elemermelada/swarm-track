@@ -48,3 +48,7 @@ def create_cartesian_observations(observation_times, bodies):
     )
 
     return observation_settings_list, simulated_observations
+
+
+def generate_dsn_observations():
+    return None

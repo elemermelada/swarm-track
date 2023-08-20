@@ -4,6 +4,8 @@ from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import numpy as np
 
+import json
+
 
 def plot_ephemeris(
     ax: Axes, ephemeris, axis=[1, 2], threeD=False, color="b", linestyle="-"
@@ -15,10 +17,15 @@ def plot_ephemeris(
             ephemeris[:, 2],
             color=color,
             linestyle=linestyle,
+            marker=".",
         )
         return ax
     ax.plot(
-        ephemeris[:, axis[0]], ephemeris[:, axis[1]], color=color, linestyle=linestyle
+        ephemeris[:, axis[0]],
+        ephemeris[:, axis[1]],
+        color=color,
+        linestyle=linestyle,
+        marker=".",
     )
     return ax
 
@@ -53,17 +60,23 @@ def plot_trajectory_from_spice(
 ):
     time2plt = np.arange(simulation_start_epoch, simulation_end_epoch, 60)
     ephemeris = list()
+    ephemeris_dict = dict()
     for epoch in time2plt:
         ephemeris.append(
             spice.get_body_cartesian_position_at_epoch(
                 target_body_name=body,
                 observer_body_name="Mars",
-                reference_frame_name="ECLIPJ2000",
+                reference_frame_name="J2000",
                 aberration_corrections="none",
                 ephemeris_time=epoch,
             )
         )
+        ephemeris_dict[epoch] = (ephemeris[-1] * 1e-3).tolist()
     ephemeris = np.array(ephemeris) * 1e-3
+
+    with open("out/spice.json", "w") as outfile:
+        outfile.write(json.dumps(ephemeris_dict))
+
     return plot_ephemeris(ax, ephemeris, axis, threeD, color, linestyle)
 
 
@@ -95,14 +108,24 @@ def init_trajectory_graph(threeD=False):
     return (ax, fig)
 
 
-def init_observation_plot():
-    fig, ax = plt.subplots(1, 1, figsize=(9, 6))
-    return fig, ax
+def init_observation_plot(n_axes=3):
+    rows = int(np.ceil(np.sqrt(n_axes)))
+    fig, axes = plt.subplots(rows, rows, figsize=(9, 6))
+    if n_axes == 1:
+        return fig, [axes]
+
+    axes = axes.reshape(rows * rows)
+    return fig, axes
 
 
-def plot_observations(ax: Axes, observations_object, start_date, color="b"):
-    observations = observations_object["concatenated_observations"]
-    times = observations_object["concatenated_times"]
+def plot_observations(
+    ax: Axes, observations_object: dict, start_date, color="b", scatter=True
+):
+    observations = observations_object.values()
+    times = np.array(list(observations_object.keys()))
     times = (times - start_date) / 86400
-    ax.scatter(times, observations, color=color)
+    if scatter:
+        ax.plot(times, observations, "x", color=color, zorder=2.5, markersize=4)
+    else:
+        ax.plot(times, observations, "o-", color=color, markersize=3)
     ax.set_xlabel("Time (days)")
