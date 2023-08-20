@@ -28,7 +28,7 @@ bodies_to_propagate = ["MEX"]
 central_bodies = ["Mars"]
 
 # Add TW stations and create links to MEX
-add_tw_stations(environment_setup, bodies.get("Mars"), tw_number, fibonacci_sphere)
+add_tw_stations(bodies.get("Mars"), tw_number, fibonacci_sphere)
 links = create_1w_tw_links(tw_number, "MEX")
 
 # General observation settings

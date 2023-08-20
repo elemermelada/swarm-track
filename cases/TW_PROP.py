@@ -101,9 +101,7 @@ def simulate_observations(
     from tudatpy.kernel.numerical_simulation import environment_setup
     from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
-    add_tw_stations(
-        environment_setup, new_bodies.get("Mars"), tw_number, fibonacci_sphere
-    )
+    add_tw_stations(new_bodies.get("Mars"), tw_number, fibonacci_sphere)
     links = create_1w_tw_links(tw_number, "MEX")
 
     # General observation settings

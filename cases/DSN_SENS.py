@@ -226,6 +226,6 @@ def show_obs(sim_obs, axes, color, scatter=True):
 
 
 show_obs(simulate_observations(None, observe="Mars"), axes, "r", scatter=False)
-show_obs(simulate_observations(None, observe="Sens"), axes, "b")
-show_obs(simulate_observations(None, observe="Sens", a=-5000), axes, "g")
+show_obs(simulate_observations(None, observe="Sens", a=15000), axes, "b")
+show_obs(simulate_observations(None, observe="Sens", a=-15000), axes, "g")
 fig2.show()

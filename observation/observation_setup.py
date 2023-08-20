@@ -1,3 +1,4 @@
+from tudatpy.kernel.numerical_simulation import estimation_setup
 from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 import numpy as np
 

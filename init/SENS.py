@@ -19,12 +19,6 @@ simulation_start_epoch = 4.0 * constants.JULIAN_YEAR + 100.0 * constants.JULIAN_
 simulation_duration = 5.0 * constants.JULIAN_DAY
 simulation_end_epoch = simulation_start_epoch + simulation_duration
 
-### CELESTIAL BODIES ###
-bodies = get_bodies(
-    simulation_start_epoch,
-    simulation_end_epoch,
-)
-
 bodies_to_propagate = ["Sens"]
 central_bodies = ["Mars"]
 
@@ -46,13 +40,9 @@ dsn_antennae_names = [
     "DSS-63",
     # "DSS-65",
 ]
-stations = environment_setup.ground_station.dsn_stations()
-for station in stations:
-    environment_setup.add_ground_station(bodies.get_body("Earth"), station)
-links = create_1w_dsn_links("Sens", dsn_antennae_names)
 
 # General observation settings
 light_time_correction_settings = (
     observation.first_order_relativistic_light_time_correction(["Sun"])
 )
-observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 3600.0)
+observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 600.0)

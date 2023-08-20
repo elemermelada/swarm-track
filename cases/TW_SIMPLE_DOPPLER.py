@@ -37,6 +37,7 @@ ax = plot_mars(ax)
 (
     observation_settings_list,
     observation_simulation_settings,
+    observable_type,
 ) = create_simple_1w_doppler_sensors(
     links, light_time_correction_settings, observation_times
 )
