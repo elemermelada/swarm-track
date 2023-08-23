@@ -16,18 +16,20 @@ def basic_propagator(
 ):
     accelerations_settings_mars_express_estimation = dict(
         Mars=[
-            propagation_setup.acceleration.spherical_harmonic_gravity(
+            propagation_setup.acceleration.point_mass_gravity()
+            if bodies.get("Mars").rotation_model.body_fixed_frame_name == "Mars_fixed"
+            else propagation_setup.acceleration.spherical_harmonic_gravity(
                 gravity_order, gravity_order
             )
         ],
-        # Phobos=[propagation_setup.acceleration.point_mass_gravity()],
-        # Deimos=[propagation_setup.acceleration.point_mass_gravity()],
-        # Earth=[propagation_setup.acceleration.point_mass_gravity()],
-        # Jupiter=[propagation_setup.acceleration.point_mass_gravity()],
-        # Sun=[
-        #     propagation_setup.acceleration.point_mass_gravity(),
-        #     # propagation_setup.acceleration.cannonball_radiation_pressure(),
-        # ],
+        Phobos=[propagation_setup.acceleration.point_mass_gravity()],
+        Deimos=[propagation_setup.acceleration.point_mass_gravity()],
+        Earth=[propagation_setup.acceleration.point_mass_gravity()],
+        Jupiter=[propagation_setup.acceleration.point_mass_gravity()],
+        Sun=[
+            propagation_setup.acceleration.point_mass_gravity(),
+            propagation_setup.acceleration.cannonball_radiation_pressure(),
+        ],
     )
     # Create updated global accelerations dictionary
     acceleration_settings_estimation = {

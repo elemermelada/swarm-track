@@ -45,4 +45,6 @@ dsn_antennae_names = [
 light_time_correction_settings = (
     observation.first_order_relativistic_light_time_correction(["Sun"])
 )
-observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 600.0)
+observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 30.0)
+
+ORBIT_A = 5000

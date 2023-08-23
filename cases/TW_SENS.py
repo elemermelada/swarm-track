@@ -28,13 +28,14 @@ from init.SENS import (
     simulation_end_epoch,
     observation_times,
     bodies_to_propagate,
+    ORBIT_A,
 )
 from util.point_distributions import fibonacci_sphere
 from util.propagation import retrieve_propagated_state_history
 
 
 USE_3D = True
-TW_NUMBER = 49
+TW_NUMBER = 9
 
 
 def simulate_observations(
@@ -73,6 +74,7 @@ def simulate_observations(
         simulation_end_epoch,
         override_mars_harmonics=override_mars_harmonics,
         extra_body={"name": "Sens"},
+        remove_mars_rotation=True,
     )
     add_tw_stations(new_bodies.get("Mars"), TW_NUMBER, fibonacci_sphere)
     links = create_1w_tw_links(TW_NUMBER, "Sens" if observe is None else observe)
@@ -131,7 +133,7 @@ def simulate_observations(
         ["Mars"],
         initial_state_error=0.0,
         override_initial_state=initial_state,
-        # gravity_order=gravity_order,
+        # gravity_order=0,
     )
 
     ### Propagate to see wassup
@@ -191,6 +193,6 @@ def show_obs(sim_obs, axes, color, scatter=True):
     return axes
 
 
-show_obs(simulate_observations(None, observe="Sens", a=15000), axes, "b")
-show_obs(simulate_observations(None, observe="Sens", a=-15000), axes, "g")
+show_obs(simulate_observations(None, observe="Sens", a=ORBIT_A), axes, "b")
+show_obs(simulate_observations(None, observe="Sens", a=-ORBIT_A), axes, "g")
 fig2.show()

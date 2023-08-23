@@ -1,3 +1,4 @@
+from matplotlib.figure import Figure
 from tudatpy.kernel.interface import spice
 
 from matplotlib.axes import Axes
@@ -40,12 +41,31 @@ def scatter_ephemeris(
             ephemeris[:, 2],
             color=color,
             linestyle=linestyle,
+            zorder=999,
         )
         return ax
     ax.scatter(
         ephemeris[:, axis[0]], ephemeris[:, axis[1]], color=color, linestyle=linestyle
     )
     return ax
+
+
+def scatter_trajectory_from_spice(
+    ax: Axes, body, timestamps, axis=[1, 2], threeD=False, color="b", linestyle="-"
+):
+    ephemeris = list()
+    for epoch in timestamps:
+        ephemeris.append(
+            spice.get_body_cartesian_position_at_epoch(
+                target_body_name=body,
+                observer_body_name="Mars",
+                reference_frame_name="J2000",
+                aberration_corrections="none",
+                ephemeris_time=epoch,
+            )
+        )
+    ephemeris = np.array(ephemeris) * 1e-3
+    return scatter_ephemeris(ax, ephemeris, axis, threeD, color, linestyle)
 
 
 def plot_trajectory_from_spice(
@@ -115,17 +135,26 @@ def init_observation_plot(n_axes=3):
         return fig, [axes]
 
     axes = axes.reshape(rows * rows)
-    return fig, axes
+    return (fig, axes)
 
 
 def plot_observations(
-    ax: Axes, observations_object: dict, start_date, color="b", scatter=True
+    ax: Axes,
+    observations_object: dict,
+    start_date,
+    color="b",
+    scatter=True,
+    marker=None,
 ):
     observations = observations_object.values()
     times = np.array(list(observations_object.keys()))
     times = (times - start_date) / 86400
     if scatter:
-        ax.plot(times, observations, "x", color=color, zorder=2.5, markersize=4)
+        if marker is None:
+            marker = "x"
+        ax.plot(times, observations, marker, color=color, zorder=2.5, markersize=4)
     else:
-        ax.plot(times, observations, "o-", color=color, markersize=3)
+        if marker is None:
+            marker = "o-"
+        ax.plot(times, observations, marker, color=color, markersize=3)
     ax.set_xlabel("Time (days)")

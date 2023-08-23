@@ -7,6 +7,7 @@ def get_bodies(
     simulation_start_epoch,
     simulation_end_epoch,
     override_mars_harmonics=None,
+    remove_mars_rotation=False,
     extra_body=None,
 ):
     bodies_to_create = ["Mars", "Phobos", "Deimos", "Sun", "Jupiter", "Earth"]
@@ -18,6 +19,16 @@ def get_bodies(
         bodies_to_create, global_frame_origin, global_frame_orientation
     )
     # original_settings = body_settings.get("Mars").gravity_field_settings
+    if remove_mars_rotation:
+        # define parameters describing the constant orientation between frames
+        target_frame = "Mars_fixed"
+        constant_orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        # create rotation model settings and assign to body settings of "Earth"
+        body_settings.get(
+            "Mars"
+        ).rotation_model_settings = environment_setup.rotation_model.constant_rotation_model(
+            global_frame_orientation, target_frame, constant_orientation
+        )
 
     if extra_body is None:
         body_settings.add_empty_settings("MEX")

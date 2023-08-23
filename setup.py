@@ -7,11 +7,15 @@ while not executed:
     if not defaulting:
         RUN_APP = input("Input case: ")
 
-    if RUN_APP.upper() == "DSN1":
+    if RUN_APP.upper() == "PROP":
+        executed = True
+        from cases.PROP_VS_SPICE import *
+
+    if RUN_APP.upper() == "DSNS":
         executed = True
         from cases.DSN_SENS import *
 
-    if RUN_APP.upper() == "TW1":
+    if RUN_APP.upper() == "TWS":
         executed = True
         from cases.TW_SENS import *
 
