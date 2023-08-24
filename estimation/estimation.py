@@ -34,7 +34,16 @@ def estimate(estimator, simulated_observations, max_iters=5):
 
 
 def get_orbital_residuals_from_spice(propagated_state, time_vector, mu, orbiter="MEX"):
+    def fix_angle(angle):
+        if angle < -np.pi:
+            angle += 2 * np.pi
+        if angle > np.pi:
+            angle -= 2 * np.pi
+        return angle
+
     residuals = []
+    spice_elements_array = []
+    prop_elements_array = []
     for i in range(len(time_vector)):
         t = time_vector[i]
         spice_state = spice.get_body_cartesian_state_at_epoch(
@@ -45,16 +54,20 @@ def get_orbital_residuals_from_spice(propagated_state, time_vector, mu, orbiter=
             ephemeris_time=t,
         )
         spice_elements = element_conversion.cartesian_to_keplerian(spice_state, mu)
+        spice_elements_array.append(spice_elements)
         prop_elements = element_conversion.cartesian_to_keplerian(
             propagated_state[i, :], mu
         )
+        prop_elements_array.append(prop_elements)
         residual = spice_elements - prop_elements
-        if residual[-1] < -np.pi:
-            residual[-1] += 2 * np.pi
-        if residual[-1] > np.pi:
-            residual[-1] -= 2 * np.pi
+        residual[-1] = fix_angle(residual[-1])
+        residual[-2] = fix_angle(residual[-2])
         residuals.append(residual)
-    return np.array(residuals)
+    return (
+        np.array(residuals),
+        np.array(prop_elements_array),
+        np.array(spice_elements_array),
+    )
 
 
 def get_ephemeris_residuals_from_spice(

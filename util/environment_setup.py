@@ -30,10 +30,11 @@ def get_bodies(
             global_frame_orientation, target_frame, constant_orientation
         )
 
-    if extra_body is None:
-        body_settings.add_empty_settings("MEX")
-    else:
-        body_settings.add_empty_settings(extra_body["name"])
+    if not extra_body is False:
+        if extra_body is None:
+            body_settings.add_empty_settings("MEX")
+        else:
+            body_settings.add_empty_settings(extra_body["name"])
     # spice_ephemeris_settings = environment_setup.ephemeris.direct_spice(
     #     frame_origin=global_frame_origin,
     #     frame_orientation=global_frame_orientation,
@@ -91,10 +92,11 @@ def get_bodies(
         )
     # Create system of bodies
     bodies = environment_setup.create_system_of_bodies(body_settings)
-    if extra_body is None:
-        bodies.get("MEX").mass = 1000.0
-    else:
-        bodies.get(extra_body["name"]).mass = 1000.0
+    if not extra_body is False:
+        if extra_body is None:
+            bodies.get("MEX").mass = 1000.0
+        else:
+            bodies.get(extra_body["name"]).mass = 1000.0
     return bodies
 
 
@@ -110,11 +112,12 @@ def add_radiation_pressure(bodies, extra_body=None):
         occulting_bodies,
     )
     # Add the radiation pressure interface to the environment
-    environment_setup.add_radiation_pressure_interface(
-        bodies,
-        "MEX" if extra_body is None else extra_body["name"],
-        radiation_pressure_settings,
-    )
+    if not extra_body is False:
+        environment_setup.add_radiation_pressure_interface(
+            bodies,
+            "MEX" if extra_body is None else extra_body["name"],
+            radiation_pressure_settings,
+        )
 
 
 def add_tw_stations(mars, number, distribution):

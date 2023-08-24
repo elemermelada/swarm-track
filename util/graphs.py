@@ -1,11 +1,12 @@
-from matplotlib.figure import Figure
 from tudatpy.kernel.interface import spice
 
+import numpy as np
+import json
+from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
-import numpy as np
 
-import json
+#plt.rcParams["text.usetex"] = True
 
 
 def plot_ephemeris(
@@ -130,7 +131,7 @@ def init_trajectory_graph(threeD=False):
 
 def init_observation_plot(n_axes=3):
     rows = int(np.ceil(np.sqrt(n_axes)))
-    fig, axes = plt.subplots(rows, rows, figsize=(9, 6))
+    fig, axes = plt.subplots(rows, rows, figsize=(9 * 1.5, 6 * 1.5))
     if n_axes == 1:
         return fig, [axes]
 

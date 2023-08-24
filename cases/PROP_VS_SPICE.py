@@ -26,12 +26,17 @@ from util.propagation import retrieve_propagated_state_history
 USE_3D = True
 
 # Add radiation pressure to environment
-add_radiation_pressure(bodies)
+# add_radiation_pressure(bodies)
 
 ## PLOT SPICE TRAJECTORY
 ax, fig = init_trajectory_graph(threeD=USE_3D)
 ax = plot_trajectory_from_spice(
-    ax, "MEX", simulation_start_epoch, simulation_end_epoch, threeD=USE_3D, color="r"
+    ax,
+    bodies_to_propagate[0],
+    simulation_start_epoch,
+    simulation_end_epoch,
+    threeD=USE_3D,
+    color="r",
 )
 ax = plot_mars(ax, threeD=USE_3D)
 
@@ -57,8 +62,12 @@ state_history, time_vector = retrieve_propagated_state_history(
 
 from tudatpy.kernel.astro import element_conversion
 
-pos_res = get_ephemeris_residuals_from_spice(state_history, time_vector, velocity=False)
-vel_res = get_ephemeris_residuals_from_spice(state_history, time_vector)
+pos_res = get_ephemeris_residuals_from_spice(
+    state_history, time_vector, velocity=False, orbiter=bodies_to_propagate[0]
+)
+vel_res = get_ephemeris_residuals_from_spice(
+    state_history, time_vector, orbiter=bodies_to_propagate[0]
+)
 fig_res, axes_res = init_observation_plot(n_axes=2)
 axes_res[0].plot(
     (time_vector - simulation_start_epoch) / 86400, pos_res[:, 0], label="r"
@@ -80,35 +89,37 @@ axes_res[1].plot(
 )
 axes_res[0].legend()
 axes_res[1].legend()
+fig_res.tight_layout()
 fig_res.show()
 
-orb_res = get_orbital_residuals_from_spice(
-    state_history, time_vector, bodies.get("Mars").gravitational_parameter
+orb_res, _, _ = get_orbital_residuals_from_spice(
+    state_history,
+    time_vector,
+    bodies.get("Mars").gravitational_parameter,
+    orbiter=bodies_to_propagate[0],
 )
 
 fig_res_orb, axes_res_orb = init_observation_plot(n_axes=6)
 
-axes_res_orb[0].plot(
-    (time_vector - simulation_start_epoch) / 86400, orb_res[:, 0], label="a"
-)
-axes_res_orb[1].plot(
-    (time_vector - simulation_start_epoch) / 86400, orb_res[:, 1], label="a"
-)
-axes_res_orb[2].plot(
-    (time_vector - simulation_start_epoch) / 86400, orb_res[:, 2], label="a"
-)
-axes_res_orb[3].plot(
-    (time_vector - simulation_start_epoch) / 86400, orb_res[:, 3], label="a"
-)
-axes_res_orb[4].plot(
-    (time_vector - simulation_start_epoch) / 86400, orb_res[:, 4], label="a"
-)
-axes_res_orb[5].plot(
+axes_res_orb[0].plot((time_vector - simulation_start_epoch) / 86400, orb_res[:, 0])
+axes_res_orb[0].title.set_text("a")
+axes_res_orb[1].plot((time_vector - simulation_start_epoch) / 86400, orb_res[:, 1])
+axes_res_orb[1].title.set_text("e")
+axes_res_orb[2].plot((time_vector - simulation_start_epoch) / 86400, orb_res[:, 2])
+axes_res_orb[2].title.set_text("i")
+axes_res_orb[3].plot((time_vector - simulation_start_epoch) / 86400, orb_res[:, 3])
+axes_res_orb[3].title.set_text(r"\omega")
+axes_res_orb[4].plot((time_vector - simulation_start_epoch) / 86400, orb_res[:, 4])
+axes_res_orb[4].title.set_text(r"\Omega")
+axes_res_orb[5].plot((time_vector - simulation_start_epoch) / 86400, orb_res[:, 5])
+axes_res_orb[5].title.set_text(r"\theta")
+axes_res_orb[6].plot(
     (time_vector - simulation_start_epoch) / 86400,
-    [ang for ang in orb_res[:, 5]],
-    label="a",
+    [orb_res[i, 5] + orb_res[i, 3] for i in range(len(orb_res[:, 5]))],
 )
+axes_res_orb[5].title.set_text(r"\theta + \omega")
 
+fig_res_orb.tight_layout()
 fig_res_orb.show()
 
 

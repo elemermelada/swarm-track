@@ -22,15 +22,19 @@ def basic_propagator(
                 gravity_order, gravity_order
             )
         ],
-        Phobos=[propagation_setup.acceleration.point_mass_gravity()],
         Deimos=[propagation_setup.acceleration.point_mass_gravity()],
         Earth=[propagation_setup.acceleration.point_mass_gravity()],
         Jupiter=[propagation_setup.acceleration.point_mass_gravity()],
         Sun=[
             propagation_setup.acceleration.point_mass_gravity(),
-            propagation_setup.acceleration.cannonball_radiation_pressure(),
+            # propagation_setup.acceleration.cannonball_radiation_pressure(),
         ],
     )
+
+    if bodies_to_propagate[0] != "Phobos":
+        accelerations_settings_mars_express_estimation["Phobos"] = [
+            propagation_setup.acceleration.point_mass_gravity()
+        ]
     # Create updated global accelerations dictionary
     acceleration_settings_estimation = {
         bodies_to_propagate[0]: accelerations_settings_mars_express_estimation
