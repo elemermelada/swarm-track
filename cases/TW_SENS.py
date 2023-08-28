@@ -28,6 +28,7 @@ from init.SENS import (
     simulation_end_epoch,
     observation_times,
     bodies_to_propagate,
+    REMOVE_MARS_ROTATION,
     ORBIT_A,
 )
 from util.point_distributions import fibonacci_sphere
@@ -35,7 +36,7 @@ from util.propagation import retrieve_propagated_state_history
 
 
 USE_3D = True
-TW_NUMBER = 9
+TW_NUMBER = 49
 
 
 def simulate_observations(
@@ -54,7 +55,6 @@ def simulate_observations(
     )
     if verbose:
         print("Evaluate x:", mars_harmonics)
-    override_mars_harmonics = None
 
     override_mars_harmonics = dict(
         normalized_cosine_coefficients=np.full((5, 5), None),
@@ -72,9 +72,9 @@ def simulate_observations(
     new_bodies = get_bodies(
         simulation_start_epoch,
         simulation_end_epoch,
-        override_mars_harmonics=override_mars_harmonics,
+        # override_mars_harmonics=override_mars_harmonics,
         extra_body={"name": "Sens"},
-        remove_mars_rotation=True,
+        remove_mars_rotation=REMOVE_MARS_ROTATION,
     )
     add_tw_stations(new_bodies.get("Mars"), TW_NUMBER, fibonacci_sphere)
     links = create_1w_tw_links(TW_NUMBER, "Sens" if observe is None else observe)
@@ -188,6 +188,8 @@ def show_obs(sim_obs, axes, color, scatter=True):
             # color=colors[i],
             color=color,
             scatter=scatter,
+            marker="o",
+            title=f"TW{i}",
         )
 
     return axes
@@ -195,4 +197,8 @@ def show_obs(sim_obs, axes, color, scatter=True):
 
 show_obs(simulate_observations(None, observe="Sens", a=ORBIT_A), axes, "b")
 show_obs(simulate_observations(None, observe="Sens", a=-ORBIT_A), axes, "g")
+fig2.tight_layout()
+fig2.savefig(
+    f"out/{TW_NUMBER}/TW_SENS_obs_{ORBIT_A}_{observation_times[1]-observation_times[0]}{'_NOROT' if REMOVE_MARS_ROTATION else ''}.svg"
+)
 fig2.show()

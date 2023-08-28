@@ -6,7 +6,141 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 
-#plt.rcParams["text.usetex"] = True
+from util.math import fix_angle
+
+# plt.rcParams["text.usetex"] = True
+
+
+def plot_trajectory_parameters(
+    axes,
+    time,
+    pos,
+    vel,
+    kep,
+    selector=(0, -1, 1),
+    scatter=False,
+    linewidth=2,
+    markersize=4,
+):
+    mode = "-"
+    if scatter:
+        mode = "x"
+    axes[-2].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        pos[selector[0] : selector[1] : selector[2], 0],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+        label="r",
+    )
+    axes[-2].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        pos[selector[0] : selector[1] : selector[2], 1],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+        label="s",
+    )
+    axes[-2].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        pos[selector[0] : selector[1] : selector[2], 2],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+        label="h",
+    )
+    axes[-2].title.set_text("Position")
+    axes[-1].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        vel[selector[0] : selector[1] : selector[2], 0],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+        label="r",
+    )
+    axes[-1].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        vel[selector[0] : selector[1] : selector[2], 1],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+        label="s",
+    )
+    axes[-1].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        vel[selector[0] : selector[1] : selector[2], 2],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+        label="h",
+    )
+    axes[-1].title.set_text("Velocity")
+    axes[-2].legend()
+    axes[-1].legend()
+
+    axes[0].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        kep[selector[0] : selector[1] : selector[2], 0],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+    )
+    axes[0].title.set_text("a")
+    axes[1].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        kep[selector[0] : selector[1] : selector[2], 1],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+    )
+    axes[1].title.set_text("e")
+    axes[2].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        kep[selector[0] : selector[1] : selector[2], 2],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+    )
+    axes[2].title.set_text("i")
+    axes[3].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        kep[selector[0] : selector[1] : selector[2], 3],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+    )
+    axes[3].title.set_text(r"\omega")
+    axes[4].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        kep[selector[0] : selector[1] : selector[2], 4],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+    )
+    axes[4].title.set_text(r"\Omega")
+    axes[5].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        kep[selector[0] : selector[1] : selector[2], 5],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+    )
+    axes[5].title.set_text(r"\theta")
+    axes[6].plot(
+        time[selector[0] : selector[1] : selector[2]],
+        [
+            fix_angle(
+                kep[selector[0] : selector[1] : selector[2], 5][i]
+                + kep[selector[0] : selector[1] : selector[2], 3][i],
+                mode=2,
+            )
+            for i in range(len(kep[selector[0] : selector[1] : selector[2], 5]))
+        ],
+        mode,
+        linewidth=linewidth,
+        markersize=markersize,
+    )
+    axes[6].title.set_text(r"\theta + \omega")
 
 
 def plot_ephemeris(
@@ -131,11 +265,19 @@ def init_trajectory_graph(threeD=False):
 
 def init_observation_plot(n_axes=3):
     rows = int(np.ceil(np.sqrt(n_axes)))
-    fig, axes = plt.subplots(rows, rows, figsize=(9 * 1.5, 6 * 1.5))
+
+    fig, axes = plt.subplots(
+        rows,
+        rows - 1 if rows * (rows - 1) >= n_axes else rows,
+        figsize=(9 * 1.5, 6 * 1.5),
+    )
     if n_axes == 1:
         return fig, [axes]
 
     axes = axes.reshape(rows * rows)
+    for i in range(len(axes) - n_axes):
+        axes[-1 - i].remove()
+
     return (fig, axes)
 
 
@@ -146,6 +288,7 @@ def plot_observations(
     color="b",
     scatter=True,
     marker=None,
+    title=None,
 ):
     observations = observations_object.values()
     times = np.array(list(observations_object.keys()))
@@ -153,9 +296,13 @@ def plot_observations(
     if scatter:
         if marker is None:
             marker = "x"
-        ax.plot(times, observations, marker, color=color, zorder=2.5, markersize=4)
+        ax.plot(times, observations, marker, color=color, zorder=2.5, markersize=2)
     else:
         if marker is None:
             marker = "o-"
         ax.plot(times, observations, marker, color=color, markersize=3)
+    if title:
+        ax.set_title(title)
+
+    # ax.set_xlim([0, 1])
     ax.set_xlabel("Time (days)")

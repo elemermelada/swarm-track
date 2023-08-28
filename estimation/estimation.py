@@ -4,6 +4,8 @@ from tudatpy.kernel.interface import spice
 from tudatpy.kernel.astro import element_conversion
 import numpy as np
 
+from util.math import fix_angle
+
 
 def create_estimator(
     bodies,
@@ -34,13 +36,6 @@ def estimate(estimator, simulated_observations, max_iters=5):
 
 
 def get_orbital_residuals_from_spice(propagated_state, time_vector, mu, orbiter="MEX"):
-    def fix_angle(angle):
-        if angle < -np.pi:
-            angle += 2 * np.pi
-        if angle > np.pi:
-            angle -= 2 * np.pi
-        return angle
-
     residuals = []
     spice_elements_array = []
     prop_elements_array = []
@@ -65,48 +60,78 @@ def get_orbital_residuals_from_spice(propagated_state, time_vector, mu, orbiter=
         residuals.append(residual)
     return (
         np.array(residuals),
-        np.array(prop_elements_array),
         np.array(spice_elements_array),
+        np.array(prop_elements_array),
     )
+
+
+def transform_vector(v, state, velocity=False):
+    r_vector = state[0:3] / np.linalg.norm(state)
+    v_vector = state[3:6]
+    w_vector = np.cross(r_vector, v_vector)
+    w_vector = w_vector / np.linalg.norm(w_vector)
+    s_vector = np.cross(w_vector, r_vector)
+    s_vector = s_vector / np.linalg.norm(s_vector)
+
+    if velocity:
+        return [
+            np.dot(v[3:6], r_vector),
+            np.dot(v[3:6], s_vector),
+            np.dot(v[3:6], w_vector),
+        ]
+
+    return [
+        np.dot(v[0:3], r_vector),
+        np.dot(v[0:3], s_vector),
+        np.dot(v[0:3], w_vector),
+    ]
 
 
 def get_ephemeris_residuals_from_spice(
     propagated_state, time_vector, velocity=True, orbiter="MEX"
 ):
-    def transform_vector(v, state):
-        r_vector = state[0:3] / np.linalg.norm(state)
-        v_vector = state[3:6]
-        w_vector = np.cross(r_vector, v_vector)
-        w_vector = w_vector / np.linalg.norm(w_vector)
-        s_vector = np.cross(w_vector, r_vector)
-        s_vector = s_vector / np.linalg.norm(s_vector)
-
-        if velocity:
-            return [
-                np.dot(v[3:6], r_vector),
-                np.dot(v[3:6], s_vector),
-                np.dot(v[3:6], w_vector),
+    return (
+        np.array(
+            [
+                transform_vector(
+                    propagated_state[i]
+                    - spice.get_body_cartesian_state_at_epoch(
+                        target_body_name=orbiter,
+                        observer_body_name="Mars",
+                        reference_frame_name="J2000",
+                        aberration_corrections="none",
+                        ephemeris_time=time_vector[i],
+                    ),
+                    propagated_state[i],
+                    velocity=velocity,
+                )
+                for i in range(len(propagated_state))
             ]
-
-        return [
-            np.dot(v[0:3], r_vector),
-            np.dot(v[0:3], s_vector),
-            np.dot(v[0:3], w_vector),
-        ]
-
-    return np.array(
-        [
-            transform_vector(
-                propagated_state[i]
-                - spice.get_body_cartesian_state_at_epoch(
-                    target_body_name=orbiter,
-                    observer_body_name="Mars",
-                    reference_frame_name="J2000",
-                    aberration_corrections="none",
-                    ephemeris_time=time_vector[i],
-                ),
-                propagated_state[i],
-            )
-            for i in range(len(propagated_state))
-        ]
+        ),
+        np.array(
+            [
+                transform_vector(
+                    spice.get_body_cartesian_state_at_epoch(
+                        target_body_name=orbiter,
+                        observer_body_name="Mars",
+                        reference_frame_name="J2000",
+                        aberration_corrections="none",
+                        ephemeris_time=time_vector[i],
+                    ),
+                    propagated_state[i],
+                    velocity=velocity,
+                )
+                for i in range(len(propagated_state))
+            ]
+        ),
+        np.array(
+            [
+                transform_vector(
+                    propagated_state[i],
+                    propagated_state[i],
+                    velocity=velocity,
+                )
+                for i in range(len(propagated_state))
+            ]
+        ),
     )

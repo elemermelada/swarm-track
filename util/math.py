@@ -27,3 +27,18 @@ def observations_rms(observations_array, new_observations_array):
         total_rms += np.sqrt(partial_sum / present_observations)
 
     return total_rms
+
+
+def fix_angle(angle, mode=1):
+    if mode == 2:
+        if angle < 0:
+            angle += 2 * np.pi
+        if angle > 2 * np.pi:
+            angle -= 2 * np.pi
+        return angle
+
+    if angle < -np.pi:
+        angle += 2 * np.pi
+    if angle > np.pi:
+        angle -= 2 * np.pi
+    return angle

@@ -18,7 +18,7 @@ simulation_start_epoch = 20.0 * constants.JULIAN_YEAR + 100.0 * constants.JULIAN
 simulation_duration = 20.0 * constants.JULIAN_DAY
 simulation_end_epoch = simulation_start_epoch + simulation_duration
 
-bodies_to_propagate = ["Phobos"]
+bodies_to_propagate = ["TGO"]
 central_bodies = ["Mars"]
 
 initial_state = spice.get_body_cartesian_state_at_epoch(

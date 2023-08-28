@@ -9,18 +9,16 @@ from util.environment_setup import get_bodies
 current_directory = os.getcwd()
 
 spice.load_standard_kernels()
-spice.load_kernel(current_directory + "/kernels/ORMM_T19_031222180906_00052.BSP")
-spice.load_kernel(current_directory + "/kernels/ORMM_T19_040201000000_00060.BSP")
-spice.load_kernel(current_directory + "/kernels/ORMM_T19_040301000000_00068.BSP")
-spice.load_kernel(current_directory + "/kernels/ORMM_T19_040401000000_00072.BSP")
-
+spice.load_kernel(
+    current_directory + "/kernels/em16_tgo_fsp_133_01_20200309_20200822_v02.bsp"
+)
 
 # Set simulation start (January 1st, 2004 - 00:00) and end epochs (January 11th, 2004 - 00:00)
-simulation_start_epoch = 4.0 * constants.JULIAN_YEAR + 100.0 * constants.JULIAN_DAY
+simulation_start_epoch = 20.0 * constants.JULIAN_YEAR + 100 * constants.JULIAN_DAY
 simulation_duration = 20.0 * constants.JULIAN_DAY
 simulation_end_epoch = simulation_start_epoch + simulation_duration
 
-bodies_to_propagate = ["MEX"]
+bodies_to_propagate = ["Phobos"]
 central_bodies = ["Mars"]
 
 initial_state = spice.get_body_cartesian_state_at_epoch(
@@ -34,7 +32,9 @@ initial_state = spice.get_body_cartesian_state_at_epoch(
 tw_number = 0  # No. of TW beacons
 
 ### CELESTIAL BODIES ###
-bodies = get_bodies(simulation_start_epoch, simulation_end_epoch)
+bodies = get_bodies(
+    simulation_start_epoch, simulation_end_epoch, extra_body={"name": "TGO"}
+)
 
 
 # General observation settings

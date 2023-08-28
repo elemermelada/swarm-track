@@ -78,6 +78,7 @@ def basic_propagator(
         initial_time=simulation_start_epoch,
         integrator_settings=integrator_settings,
         termination_settings=termination_settings,
+        # propagator=propagation_setup.propagator.TranslationalPropagatorType.unified_state_model_quaternions,
     )
 
     return propagator_settings_estimation

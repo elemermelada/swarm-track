@@ -33,11 +33,11 @@ from util.propagation import retrieve_propagated_state_history
 import numpy as np
 from tudatpy.kernel.numerical_simulation import estimation
 
-
+fig_ax = None
 USE_3D = True
 
 
-def plot_doppler_effect(new_bodies, state_history, time_vector):
+def plot_doppler_effect(new_bodies, state_history, time_vector, fig_ax=None):
     earth_ephemeris = [
         new_bodies.get("Earth").ephemeris.get_cartesian_state(t)[0:6]
         for t in time_vector
@@ -71,12 +71,26 @@ def plot_doppler_effect(new_bodies, state_history, time_vector):
     mars_observations = {
         key: value for key, value in zip(time_vector, doppler_mars_from_earth)
     }
-    fig, ax = init_observation_plot(n_axes=1)
-    plot_observations(ax[0], orbiter_observations, simulation_start_epoch, marker="o")
+    color = "b"
+    if fig_ax is None:
+        fig, ax = init_observation_plot(n_axes=1)
+    else:
+        color = "g"
+        fig, ax = fig_ax
     plot_observations(
-        ax[0], mars_observations, simulation_start_epoch, color="r", marker="o"
+        ax[0],
+        {
+            t: orbiter_observations[t] - mars_observations[t]
+            for t in list(orbiter_observations.keys())
+        },
+        simulation_start_epoch,
+        marker="o",
+        color=color,
     )
-    fig.show()
+    # plot_observations(
+    #     ax[0], mars_observations, simulation_start_epoch, color="r", marker="o"
+    # )
+    return fig, ax
 
 
 def create_initial_state(R, TYPE, new_bodies):
@@ -164,6 +178,7 @@ def simulate_observations(
             observation_simulation_settings,
             links,
             dsn_antennae_names,
+            fake=True if observe == "Mars" else False,
         ),
         noise=0.0,
     )
@@ -213,7 +228,10 @@ def simulate_observations(
 
     # Creating some plots here...
     if not observe == "Mars":
-        plot_doppler_effect(new_bodies, state_history, time_vector)
+        global fig_ax
+        fig_ax = plot_doppler_effect(
+            new_bodies, state_history, time_vector, fig_ax=fig_ax
+        )
 
     return [
         antenna_results[-1].observations_history
@@ -230,7 +248,7 @@ def show_obs(sim_obs, axes, color, scatter=True):
     obs_count = len(sim_obs)
     ant_count = len(dsn_antennae_names)
     mult = int(obs_count / ant_count)
-    for i in range(3):
+    for i in range(ant_count):
         filtered_observations = sim_obs[mult * (i + 1) - 1]
         plot_observations(
             axes[i],
@@ -239,6 +257,7 @@ def show_obs(sim_obs, axes, color, scatter=True):
             # color=colors[i],
             color=color,
             scatter=scatter,
+            title=dsn_antennae_names[i],
         )
 
     return axes
@@ -247,4 +266,11 @@ def show_obs(sim_obs, axes, color, scatter=True):
 show_obs(simulate_observations(None, observe="Mars"), axes, "r", scatter=False)
 show_obs(simulate_observations(None, observe="Sens", a=ORBIT_A), axes, "b")
 show_obs(simulate_observations(None, observe="Sens", a=-ORBIT_A), axes, "g")
+fig2.tight_layout()
+fig2.savefig("out/DSN_SENS_obs.svg")
 fig2.show()
+
+fig, ax = fig_ax
+fig.tight_layout()
+fig.savefig("out/DSN_SENS_Doppler.svg")
+fig.show()
