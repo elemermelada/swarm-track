@@ -2,6 +2,7 @@ from tudatpy.kernel.interface import spice
 
 import numpy as np
 import json
+from matplotlib import cm
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
@@ -248,7 +249,7 @@ def plot_mars(ax: Axes, threeD=False):
 
 def init_trajectory_graph(threeD=False):
     if threeD:
-        fig = plt.figure()
+        fig = plt.figure(figsize=(9, 9))
         ax = fig.add_subplot(projection="3d")
         return (ax, fig)
 
@@ -306,3 +307,35 @@ def plot_observations(
 
     # ax.set_xlim([0, 1])
     ax.set_xlabel("Time (days)")
+
+
+def init_distributions_graph(n_axes=3):
+    rows = int(np.ceil(np.sqrt(n_axes)))
+
+    fig, axes = plt.subplots(
+        rows,
+        rows - 1 if rows * (rows - 1) >= n_axes else rows,
+        figsize=(9 * 1.5, 6 * 1.5),
+        subplot_kw={"projection": "3d"},
+    )
+    if n_axes == 1:
+        return fig, [axes]
+
+    axes = axes.reshape(rows * rows)
+    for i in range(len(axes) - n_axes):
+        axes[-1 - i].remove()
+
+    return (fig, axes)
+
+
+def plot_sphere(ax: Axes, radius: float, fn: int):
+    theta = np.linspace(0, 2.0 * np.pi, fn)
+    phi = np.linspace(0, np.pi, fn)
+
+    # Convert to Cartesian coordinates
+    x = radius * np.outer(np.cos(theta), np.sin(phi))
+    y = radius * np.outer(np.sin(theta), np.sin(phi))
+    z = radius * np.outer(np.ones(np.size(theta)), np.cos(phi))
+    # Plot the sphere
+    ax.plot_wireframe(x, y, z, linewidth=0.3, color=(0.1, 0.1, 0.1, 1))
+    return ax

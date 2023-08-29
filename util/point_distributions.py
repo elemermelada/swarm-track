@@ -31,3 +31,27 @@ def random_sphere(samples=10):
         coordinates[i] = (lat, long)
 
     return coordinates
+
+
+def pole_sphere(samples=10, sigma=30.0):
+    coordinates = np.zeros((samples, 2))
+
+    for i in range(samples):
+        lat = np.random.normal(90, sigma)
+        if lat > 90:
+            lat = 180 - lat
+        long = np.random.random() * 360 - 180
+        coordinates[i] = (lat, long)
+
+    return coordinates
+
+
+def equatorial_sphere(samples=10, sigma=10.0):
+    coordinates = np.zeros((samples, 2))
+
+    for i in range(samples):
+        lat = np.random.normal(0, sigma)
+        long = -180 + 360 * i / (samples - 1)
+        coordinates[i] = (lat, long)
+
+    return coordinates

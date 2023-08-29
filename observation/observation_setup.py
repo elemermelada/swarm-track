@@ -166,7 +166,10 @@ def add_tw_viability_check(
 ):
     for i in range(len(links)):
         viability_settings = [
-            observation.elevation_angle_viability(["Mars", f"TW{i}"], elevation_angle)
+            observation.elevation_angle_viability(["Mars", f"TW{i}"], elevation_angle),
+            observation.body_avoidance_viability(
+                ["Earth", f"TW{i}"], "Sun", np.deg2rad(5)
+            ),
         ]
         observation.add_viability_check_to_observable_for_link_ends(
             observation_simulation_settings,
@@ -193,9 +196,13 @@ def add_dsn_viability_check(
             observation.body_occultation_viability(
                 ["Earth", dsn_antennae_names[i]], "Mars"
             ),
+            observation.body_avoidance_viability(
+                ["Earth", dsn_antennae_names[i]], "Sun", np.deg2rad(5)
+            ),
         ]
         if fake:
             viability_settings = []
+
         observation.add_viability_check_to_observable_for_link_ends(
             observation_simulation_settings,
             viability_settings,
