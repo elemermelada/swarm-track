@@ -1,6 +1,23 @@
 import numpy as np
 
 
+def geo_2_cart(coordinates: np.array, radius: float):
+    lat_rad, long_rad = np.deg2rad(coordinates)
+    x = radius * np.cos(long_rad) * np.cos(lat_rad)
+    y = radius * np.sin(long_rad) * np.cos(lat_rad)
+    z = radius * np.sin(lat_rad)
+    return np.array([x, y, z])
+
+
+def cart_2_geo(coordinates: np.array, radius: float):
+    x, y, z = coordinates / radius
+
+    lat = np.rad2deg(np.arctan2(z, np.sqrt(x * x + y * y)))
+    long = np.rad2deg(np.arctan2(y, x))
+
+    return np.array([lat, long])
+
+
 def fibonacci_sphere(samples=10):
     coordinates = np.zeros((samples, 2))
     phi = np.pi * (np.sqrt(5.0) - 1.0)  # golden angle in radians
@@ -14,10 +31,7 @@ def fibonacci_sphere(samples=10):
         x = np.cos(theta) * radius
         z = np.sin(theta) * radius
 
-        lat = np.rad2deg(np.arctan2(z, np.sqrt(x * x + y * y)))
-        long = np.rad2deg(np.arctan2(y, x))
-
-        coordinates[i] = (lat, long)
+        coordinates[i] = cart_2_geo(np.array([x, y, z]), 1)
 
     return coordinates
 
@@ -55,3 +69,14 @@ def equatorial_sphere(samples=10, sigma=10.0):
         coordinates[i] = (lat, long)
 
     return coordinates
+
+
+def add_error_to_coordinates(coordinates_array: np.array, radius: float, error: float):
+    result_coordinates = []
+    for coordinates in coordinates_array:
+        cart_coords = geo_2_cart(coordinates, radius)
+        cart_coords_w_error = np.array(
+            [np.random.normal(cart_coord, error) for cart_coord in cart_coords]
+        )
+        result_coordinates.append(cart_2_geo(cart_coords_w_error, radius))
+    return result_coordinates
