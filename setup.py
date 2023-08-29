@@ -19,6 +19,10 @@ while not executed:
         executed = True
         from cases.TW_SENS import *
 
+    if RUN_APP.upper() == "TWD":
+        executed = True
+        from cases.TW_DISTR import *
+
     if not executed:
         if default is None:
             print("Add a default case first")
