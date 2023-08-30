@@ -19,7 +19,7 @@ def create_estimator(
     return estimator
 
 
-def estimate(estimator, simulated_observations, max_iters=5):
+def estimate(estimator, simulated_observations, max_iters=10):
     convergence_checker = estimation.estimation_convergence_checker(
         maximum_iterations=max_iters, number_of_iterations_without_improvement=2
     )

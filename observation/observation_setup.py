@@ -344,4 +344,4 @@ def create_simple_1w_range_sensors(
         observation_simulation_settings,
         links,
     )
-    return observation_settings_list, observation_simulation_settings
+    return observation_settings_list, observation_simulation_settings, observable_type
