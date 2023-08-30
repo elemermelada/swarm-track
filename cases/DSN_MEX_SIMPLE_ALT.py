@@ -1,4 +1,4 @@
-from optimization.optimizers import TrustRegionOptimizer
+from util.optimizers import GeneticOptimizer, TrustRegionOptimizer
 from util.environment_setup import add_dsn_stations, get_bodies
 from util.dynamical_models import basic_propagator
 from util.graphs import (
@@ -175,7 +175,7 @@ def cost_function(x):
 
     x0 = np.array(
         [
-            4.02619229e06 + 1e3,
+            4.02619229e06 + 3e3,
             -5.57611562e06 + 0e3,
             5.55651973e06,
             1.02259367e03,
@@ -206,8 +206,10 @@ def cost_function(x):
 
 
 x0 = np.array([0 for x in range(6)])
-lb = np.array([-1e4 for x in range(6)])
-ub = np.array([1e4 for x in range(6)])
+lb = np.array([-1e3 for x in range(6)])
+ub = np.array([1e3 for x in range(6)])
+
+cost_function(x0)
 
 res = TrustRegionOptimizer(cost_function, x0, l_bound=lb, u_bound=ub)
 

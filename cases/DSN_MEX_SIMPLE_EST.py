@@ -145,7 +145,7 @@ _, actual_observations, _ = simulate_observations(None, observe="MEX")
 _, flawed_observations, estimator = simulate_observations(
     initial_state=np.array(
         [
-            4.02619229e06 + 1 * -2.62e3 + 0 * 2.68e3,
+            4.02619229e06 + 0 * -2.62e3 + 0 * 2.68e3 + 3e3,
             -5.57611562e06 + 0 * -1.85e3 + 0 * 1.8e3,
             5.55651973e06 + 0 * -1.93e3 + 0 * 1.95e3,
             1.02259367e03,

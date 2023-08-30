@@ -19,7 +19,9 @@ def observations_rms(observations_array, new_observations_array):
             try:
                 new_observation = new_observations[t]
             except:
-                partial_sum += np.sum((observation) ** 2)
+                if True:  # XXX - being silly
+                    partial_sum += np.sum((observation) ** 2)
+                    present_observations += len(observation)
                 missing_observations += len(observation)
                 continue
             partial_sum += np.sum((observation - new_observation) ** 2)
