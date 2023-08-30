@@ -23,6 +23,10 @@ while not executed:
         executed = True
         from cases.TW_DISTR import *
 
+    if RUN_APP.upper() == "TWMSE":
+        executed = True
+        from cases.TW_MEX_SIMPLE_EST import *
+
     if not executed:
         if default is None:
             print("Add a default case first")
