@@ -222,9 +222,10 @@ def create_simple_1w_doppler_sensors(
     observation_settings_list = add_simple_1w_doppler_observation_settings(
         links,
         light_time_correction_settings=light_time_correction_settings,
+        observation_settings_list=[],
     )
     observation_simulation_settings = add_observation_simulators(
-        observation_times, links, observable_type
+        observation_times, links, observable_type, observation_simulation_settings=[]
     )
     if noise:
         add_noise(
@@ -344,4 +345,4 @@ def create_simple_1w_range_sensors(
         observation_simulation_settings,
         links,
     )
-    return observation_settings_list, observation_simulation_settings
+    return observation_settings_list, observation_simulation_settings, observable_type

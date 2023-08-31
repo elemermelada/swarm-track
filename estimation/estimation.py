@@ -19,7 +19,7 @@ def create_estimator(
     return estimator
 
 
-def estimate(estimator, simulated_observations, max_iters=5):
+def estimate(estimator, simulated_observations, max_iters=10):
     convergence_checker = estimation.estimation_convergence_checker(
         maximum_iterations=max_iters, number_of_iterations_without_improvement=2
     )
@@ -85,6 +85,17 @@ def transform_vector(v, state, velocity=False):
         np.dot(v[0:3], s_vector),
         np.dot(v[0:3], w_vector),
     ]
+
+
+def inverse_transform_vector(v, state, velocity=False):
+    trans_matrix = np.zeros((3, 3))
+    trans_matrix[0, :] = transform_vector(np.array([1, 0, 0]), state, False)
+    trans_matrix[1, :] = transform_vector(np.array([0, 1, 0]), state, False)
+    trans_matrix[2, :] = transform_vector(np.array([0, 0, 1]), state, False)
+
+    if velocity:
+        return np.matmul(trans_matrix, v[3:6])
+    return np.matmul(trans_matrix, v[0:3])
 
 
 def get_ephemeris_residuals_from_spice(

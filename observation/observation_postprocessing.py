@@ -47,3 +47,25 @@ def retrieve_observations_with_link(observations_output, observation_link):
     filtered_observations["concatenated_observations"] = observations
 
     return filtered_observations
+
+
+def observations_difference(observations_array, new_observations_array):
+    diff = []
+    for i in range(len(observations_array)):
+        observations: dict = observations_array[i]
+        new_observations: dict = new_observations_array[i]
+        observation_epochs = observations.keys()
+        antenna_diff = dict()
+        for t in observation_epochs:
+            observation = observations[t]
+            try:
+                new_observation = new_observations[t]
+            except:
+                if False:  # XXX - being silly
+                    antenna_diff[t] = observation
+                continue
+            antenna_diff[t] = observation - new_observation
+
+        diff.append(antenna_diff)
+
+    return diff, 0, 0
