@@ -297,11 +297,26 @@ def plot_observations(
     if scatter:
         if marker is None:
             marker = "x"
-        ax.plot(times, observations, marker, color=color, zorder=2.5, markersize=2)
+        ax.plot(
+            times,
+            observations,
+            marker,
+            color=color,
+            zorder=2.5,
+            markersize=2,
+            # label="Mars-Express",
+        )
     else:
         if marker is None:
             marker = "o-"
-        ax.plot(times, observations, marker, color=color, markersize=3)
+        ax.plot(
+            times,
+            observations,
+            marker,
+            color=color,
+            markersize=3,
+            # label="Mars"
+        )
     if title:
         ax.set_title(title)
 

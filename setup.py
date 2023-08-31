@@ -1,11 +1,11 @@
 executed = False
 defaulting = False
-default = None
+default = "DSNMSE"
 
 while not executed:
     RUN_APP = default
     if not defaulting:
-        RUN_APP = input("Input case: ")
+        RUN_APP = input(f"Input case{'' if default is None else f' [{default}]'}: ")
 
     if RUN_APP.upper() == "PROP":
         executed = True
@@ -22,6 +22,21 @@ while not executed:
     if RUN_APP.upper() == "TWD":
         executed = True
         from cases.TW_DISTR import *
+
+    if RUN_APP.upper() == "DSNMSO":
+        executed = True
+        from cases.DSN_MEX_SIMPLE_OBS import *
+
+    if RUN_APP.upper() == "DSNMSA":
+        executed = True
+        from cases.DSN_MEX_SIMPLE_ALT import *
+
+    if RUN_APP.upper() == "DSNMSE":
+        executed = True
+        from cases.DSN_MEX_SIMPLE_EST import *
+    # if RUN_APP.upper() == "TWMSE":
+    #     executed = True
+    #     from cases.TW_MEX_SIMPLE_EST import *
 
     if not executed:
         if default is None:

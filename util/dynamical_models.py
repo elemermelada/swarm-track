@@ -3,6 +3,8 @@ import numpy as np
 from tudatpy.kernel.numerical_simulation import propagation_setup
 from tudatpy.kernel.interface import spice
 
+from estimation.estimation import inverse_transform_vector, transform_vector
+
 
 def basic_propagator(
     simulation_start_epoch,
@@ -12,6 +14,7 @@ def basic_propagator(
     central_bodies,
     initial_state_error=None,
     override_initial_state=None,
+    initial_state_perturbation=None,
     gravity_order=4,
 ):
     accelerations_settings_mars_express_estimation = dict(
@@ -55,7 +58,16 @@ def basic_propagator(
             aberration_corrections="none",
             ephemeris_time=simulation_start_epoch,
         )
+        if not initial_state_perturbation is None:
+            init_pos = inverse_transform_vector(
+                initial_state_perturbation, initial_state
+            )
+            init_vel = inverse_transform_vector(
+                initial_state_perturbation, initial_state, velocity=True
+            )
+            initial_state = initial_state + np.concatenate((init_pos, init_vel))
 
+        print(initial_state)
     if not initial_state_error is None:
         initial_state = np.multiply(
             initial_state,

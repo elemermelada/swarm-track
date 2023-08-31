@@ -11,7 +11,7 @@ def TrustRegionOptimizer(f, x0, l_bound, u_bound):
     res = minimize(
         f,
         x0,
-        method="trust-constr",
+        method="BFGS",
         options={
             "verbose": 3,
             "maxiter": 100,
