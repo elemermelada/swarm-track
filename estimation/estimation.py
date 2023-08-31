@@ -87,6 +87,17 @@ def transform_vector(v, state, velocity=False):
     ]
 
 
+def inverse_transform_vector(v, state, velocity=False):
+    trans_matrix = np.zeros((3, 3))
+    trans_matrix[0, :] = transform_vector(np.array([1, 0, 0]), state, False)
+    trans_matrix[1, :] = transform_vector(np.array([0, 1, 0]), state, False)
+    trans_matrix[2, :] = transform_vector(np.array([0, 0, 1]), state, False)
+
+    if velocity:
+        return np.matmul(trans_matrix, v[3:6])
+    return np.matmul(trans_matrix, v[0:3])
+
+
 def get_ephemeris_residuals_from_spice(
     propagated_state, time_vector, velocity=True, orbiter="MEX"
 ):

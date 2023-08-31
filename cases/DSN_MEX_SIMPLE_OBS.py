@@ -1,3 +1,4 @@
+from observation.observation_postprocessing import observations_difference
 from util.environment_setup import add_dsn_stations, get_bodies
 from util.dynamical_models import basic_propagator
 from util.graphs import (
@@ -44,7 +45,7 @@ add_dsn_stations(new_bodies.get_body("Earth"))
 
 
 def simulate_observations(
-    initial_state=None,
+    initial_state_perturbation=None,
     observe=None,
 ):
     links = create_1w_dsn_links(observe, dsn_antennae_names)
@@ -83,7 +84,7 @@ def simulate_observations(
         bodies_to_propagate,
         ["Mars"],
         initial_state_error=0.0,
-        override_initial_state=initial_state,
+        initial_state_perturbation=initial_state_perturbation,
         # gravity_order=0,
     )
 
@@ -116,9 +117,6 @@ def simulate_observations(
     )
 
 
-fig2, axes = init_observation_plot()
-
-
 def show_obs(sim_obs, axes, color, scatter=True, which=None):
     sim_obs, _, _ = sim_obs
     obs_count = len(sim_obs)
@@ -140,13 +138,47 @@ def show_obs(sim_obs, axes, color, scatter=True, which=None):
     return axes
 
 
-show_obs(simulate_observations(None, observe="MEX"), axes, "k", which=[0, 1, 2])
+real_obs = simulate_observations(None, observe="MEX")
+fake_obs = simulate_observations(
+    initial_state_perturbation=np.array(
+        [
+            0 * -2.62e3 + 0 * 2.68e3 + 1e3,
+            0 * -1.85e3 + 0 * 1.8e3 + 1e3,
+            0 * -1.93e3 + 0 * 1.95e3 + 1e3,
+            1e0,
+            1e0,
+            1e0,
+        ]
+    ),
+    observe="MEX",
+)
+
+fig, axes = init_observation_plot()
+
+show_obs(real_obs, axes, "k")
+show_obs(
+    fake_obs,
+    axes,
+    "r",
+)
 show_obs(
     simulate_observations(None, observe="Mars"),
     axes,
     "r",
     scatter=False,
-    which=[1, 3, 5],
+)
+
+
+fig.tight_layout()
+fig.savefig("out/DSN_MEX_SIMPLE_obs.svg")
+fig.show()
+
+fig2, axes2 = init_observation_plot()
+
+show_obs(
+    observations_difference(real_obs[0], fake_obs[0]),
+    axes2,
+    "r",
 )
 
 fig2.tight_layout()

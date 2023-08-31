@@ -20,8 +20,14 @@ spice.load_kernel(current_directory + "/kernels/ORMM_T19_040401000000_00072.BSP"
 
 
 # Set simulation start (January 1st, 2004 - 00:00) and end epochs (January 11th, 2004 - 00:00)
-simulation_start_epoch = 4.0 * constants.JULIAN_YEAR + 100.0 * constants.JULIAN_DAY
-simulation_duration = 1.0 * constants.JULIAN_DAY
+simulation_start_epoch = 4.0 * constants.JULIAN_YEAR + 105 * constants.JULIAN_DAY
+duration = 0.01
+with open("out/timestamps_bench.out", "r") as f:
+    data = f.readlines()
+    if len(data) != 0:
+        separator = data[-1].index(",")
+        duration = float(data[-1][0:separator]) + 0.01
+simulation_duration = 0.5 * constants.JULIAN_DAY
 simulation_end_epoch = simulation_start_epoch + simulation_duration
 
 ### CELESTIAL BODIES ###

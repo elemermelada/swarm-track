@@ -30,6 +30,7 @@ from init.MEX_DSN import (
     dsn_antennae_names,
     bodies_to_propagate,
 )
+from util.math import vector_rms
 from util.propagation import retrieve_propagated_state_history
 import numpy as np
 from tudatpy.kernel.numerical_simulation import estimation
@@ -45,7 +46,7 @@ add_dsn_stations(new_bodies.get_body("Earth"))
 
 
 def simulate_observations(
-    initial_state=None,
+    initial_state_perturbation=None,
     observe=None,
 ):
     links = create_1w_dsn_links(observe, dsn_antennae_names)
@@ -73,7 +74,7 @@ def simulate_observations(
             dsn_antennae_names,
             fake=True if observe == "Mars" else False,
         ),
-        noise=0.0,
+        noise=2e-4,
     )
 
     propagator_settings_estimation = basic_propagator(
@@ -83,7 +84,7 @@ def simulate_observations(
         bodies_to_propagate,
         ["Mars"],
         initial_state_error=0.0,
-        override_initial_state=initial_state,
+        initial_state_perturbation=initial_state_perturbation,
         # gravity_order=0,
     )
 
@@ -139,25 +140,35 @@ def show_obs(sim_obs, axes, color, scatter=True, which=None):
     return axes
 
 
-# print("lol")
 _, actual_observations, _ = simulate_observations(None, observe="MEX")
-# print("lol")
 _, flawed_observations, estimator = simulate_observations(
-    initial_state=np.array(
+    initial_state_perturbation=np.array(
         [
-            4.02619229e06 + 0 * -2.62e3 + 0 * 2.68e3 + 3e3,
-            -5.57611562e06 + 0 * -1.85e3 + 0 * 1.8e3,
-            5.55651973e06 + 0 * -1.93e3 + 0 * 1.95e3,
-            1.02259367e03,
-            5.05922102e02,
-            1.94562060e03,
+            1e3,
+            0e3,
+            0e3,
+            0e0,
+            0e0,
+            0e0,
         ]
     ),
     observe="MEX",
 )
-# print("lol")
+from tudatpy.kernel.interface import spice
 
+solution = spice.get_body_cartesian_state_at_epoch(
+    target_body_name=bodies_to_propagate[0],
+    observer_body_name="Mars",
+    reference_frame_name="J2000",
+    aberration_corrections="none",
+    ephemeris_time=simulation_start_epoch,
+)
 result = estimate(estimator, actual_observations)
+final_parameters = np.array(result.parameter_history)[:, -1]
+with open("out/timestamps_bench.out", "+a") as f:
+    f.write(
+        f"{(simulation_end_epoch-simulation_start_epoch)/86400}, {vector_rms(final_parameters[0:3]-solution[0:3])}, {vector_rms(final_parameters[3:6]-solution[3:6])}\n"
+    )
 
 fig2.tight_layout()
 # fig2.savefig("out/DSN_SENS_obs.svg")
