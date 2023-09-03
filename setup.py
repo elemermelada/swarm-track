@@ -2,6 +2,8 @@ executed = False
 defaulting = False
 default = "DSNMSE"
 
+print("By Elemer 😘")
+
 while not executed:
     RUN_APP = default
     if not defaulting:
@@ -35,6 +37,10 @@ while not executed:
         executed = True
         from cases.DSN_MEX_SIMPLE_EST import *
 
+    if RUN_APP.upper() == "DSNMBE":
+        executed = True
+        from cases.DSN_MEX_BATCH_EST import *
+
     if RUN_APP.upper() == "TWMSE":
         executed = True
         from cases.TW_MEX_SIMPLE_EST import *
@@ -45,6 +51,5 @@ while not executed:
             continue
         print("Running default case:", default)
         defaulting = True
-
 
 print("Add breakpoint here to hold plots")

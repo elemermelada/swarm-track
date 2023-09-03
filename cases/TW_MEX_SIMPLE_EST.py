@@ -31,7 +31,12 @@ from init.MEX_10TW import (
     bodies_to_propagate,
     tw_number,
 )
-from util.point_distributions import fibonacci_sphere
+from util.math import vector_rms
+from util.point_distributions import (
+    add_error_to_coordinates,
+    equatorial_sphere,
+    fibonacci_sphere,
+)
 from util.propagation import retrieve_propagated_state_history
 
 import numpy as np
@@ -39,19 +44,22 @@ import numpy as np
 USE_3D = True
 TW_NUMBER = tw_number
 
+tw_stations = equatorial_sphere(TW_NUMBER)
+tw_stations_wrapper = lambda err: (
+    lambda x: add_error_to_coordinates(tw_stations, 3389.5e3, err)
+)
+
 
 def simulate_observations(
-    initial_state=None,
-    premultiplied_mars_harmonics=None,
-    verbose=False,
+    initial_state_perturbation=None,
     observe=None,
-    a=5000,
+    err=0.0,
 ):
     new_bodies = get_bodies(
         simulation_start_epoch,
         simulation_end_epoch,
     )
-    add_tw_stations(new_bodies.get("Mars"), TW_NUMBER, fibonacci_sphere)
+    add_tw_stations(new_bodies.get("Mars"), TW_NUMBER, tw_stations_wrapper(err))
     links = create_1w_tw_links(TW_NUMBER, "MEX" if observe is None else observe)
 
     # General observation settings
@@ -75,7 +83,7 @@ def simulate_observations(
             observation_simulation_settings,
             links,
         ),
-        noise=0.1,
+        noise=5e-2,
     )
 
     # override_mars_harmonics.normalized_cosine_coefficients[]
@@ -86,7 +94,7 @@ def simulate_observations(
         bodies_to_propagate,
         ["Mars"],
         initial_state_error=0.0,
-        override_initial_state=initial_state,
+        initial_state_perturbation=initial_state_perturbation,
         # gravity_order=0,
     )
 
@@ -123,17 +131,31 @@ def simulate_observations(
 
 _, actual_observations, _ = simulate_observations(None, observe="MEX")
 _, flawed_observations, estimator = simulate_observations(
-    initial_state=np.array(
+    initial_state_perturbation=np.array(
         [
-            4.02619229e06 + 1 * -2.62e3 + 0 * 2.68e3,
-            -5.57611562e06 + 0 * -1.85e3 + 0 * 1.8e3,
-            5.55651973e06 + 0 * -1.93e3 + 0 * 1.95e3,
-            1.02259367e03,
-            5.05922102e02,
-            1.94562060e03,
+            1e3,
+            0e3,
+            0e3,
+            0e0,
+            0e0,
+            0e0,
         ]
     ),
     observe="MEX",
+    err=5e-2,
 )
+from tudatpy.kernel.interface import spice
 
+solution = spice.get_body_cartesian_state_at_epoch(
+    target_body_name=bodies_to_propagate[0],
+    observer_body_name="Mars",
+    reference_frame_name="J2000",
+    aberration_corrections="none",
+    ephemeris_time=simulation_start_epoch,
+)
 result = estimate(estimator, actual_observations)
+final_parameters = np.array(result.parameter_history)[:, -1]
+with open("out/timestamps_bench_TW.out", "+a") as f:
+    f.write(
+        f"{(simulation_end_epoch-simulation_start_epoch)/86400}, {vector_rms(final_parameters[0:3]-solution[0:3])}, {vector_rms(final_parameters[3:6]-solution[3:6])}\n"
+    )

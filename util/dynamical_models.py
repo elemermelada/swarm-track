@@ -67,7 +67,6 @@ def basic_propagator(
             )
             initial_state = initial_state + np.concatenate((init_pos, init_vel))
 
-        print(initial_state)
     if not initial_state_error is None:
         initial_state = np.multiply(
             initial_state,

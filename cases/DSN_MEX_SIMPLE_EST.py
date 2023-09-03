@@ -165,7 +165,7 @@ solution = spice.get_body_cartesian_state_at_epoch(
 )
 result = estimate(estimator, actual_observations)
 final_parameters = np.array(result.parameter_history)[:, -1]
-with open("out/timestamps_bench.out", "+a") as f:
+with open("out/timestamps_bench_DSN.out", "+a") as f:
     f.write(
         f"{(simulation_end_epoch-simulation_start_epoch)/86400}, {vector_rms(final_parameters[0:3]-solution[0:3])}, {vector_rms(final_parameters[3:6]-solution[3:6])}\n"
     )
