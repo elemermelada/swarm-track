@@ -65,7 +65,7 @@ def get_orbital_residuals_from_spice(propagated_state, time_vector, mu, orbiter=
     )
 
 
-def transform_vector(v, state, velocity=False):
+def transform_vector(v, state, velocity=False, all=False):
     r_vector = state[0:3] / np.linalg.norm(state)
     v_vector = state[3:6]
     w_vector = np.cross(r_vector, v_vector)
@@ -75,6 +75,16 @@ def transform_vector(v, state, velocity=False):
 
     if velocity:
         return [
+            np.dot(v[3:6], r_vector),
+            np.dot(v[3:6], s_vector),
+            np.dot(v[3:6], w_vector),
+        ]
+
+    if all:
+        return [
+            np.dot(v[0:3], r_vector),
+            np.dot(v[0:3], s_vector),
+            np.dot(v[0:3], w_vector),
             np.dot(v[3:6], r_vector),
             np.dot(v[3:6], s_vector),
             np.dot(v[3:6], w_vector),

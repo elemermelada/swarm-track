@@ -4,8 +4,6 @@ import numpy as np
 
 
 def get_bodies(
-    simulation_start_epoch,
-    simulation_end_epoch,
     override_mars_harmonics=None,
     remove_mars_rotation=False,
     extra_body=None,
