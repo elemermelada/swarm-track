@@ -38,15 +38,13 @@ from tudatpy.kernel.numerical_simulation import estimation
 USE_3D = True
 
 
-new_bodies = get_bodies(
-    simulation_start_epoch,
-    simulation_end_epoch,
-)
+new_bodies = get_bodies()
 add_dsn_stations(new_bodies.get_body("Earth"))
 
 
 def simulate_observations(
     initial_state_perturbation=None,
+    override_initial_state=None,
     observe=None,
 ):
     links = create_1w_dsn_links(observe, dsn_antennae_names)
@@ -84,6 +82,7 @@ def simulate_observations(
         bodies_to_propagate,
         ["Mars"],
         initial_state_error=0.0,
+        override_initial_state=override_initial_state,
         initial_state_perturbation=initial_state_perturbation,
         # gravity_order=0,
     )
@@ -142,14 +141,14 @@ def show_obs(sim_obs, axes, color, scatter=True, which=None):
 
 _, actual_observations, _ = simulate_observations(None, observe="MEX")
 _, flawed_observations, estimator = simulate_observations(
-    initial_state_perturbation=np.array(
+    override_initial_state=np.array(
         [
-            1e3,
-            0e3,
-            0e3,
-            0e0,
-            0e0,
-            0e0,
+            4.02623428e06,
+            -5.57611567e06,
+            5.55648914e06,
+            1.02260251e03,
+            5.05921148e02,
+            1.94561622e03,
         ]
     ),
     observe="MEX",

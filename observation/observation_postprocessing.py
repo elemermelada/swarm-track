@@ -1,5 +1,7 @@
 import numpy as np
 
+from estimation.estimation import transform_vector
+
 
 def retrieve_ephemeris_from_cartesian_observations(simulated_observations):
     return np.reshape(simulated_observations.concatenated_observations, (-1, 3))
@@ -49,7 +51,7 @@ def retrieve_observations_with_link(observations_output, observation_link):
     return filtered_observations
 
 
-def observations_difference(observations_array, new_observations_array):
+def observations_difference(observations_array, new_observations_array, sign=1):
     diff = []
     for i in range(len(observations_array)):
         observations: dict = observations_array[i]
@@ -64,8 +66,31 @@ def observations_difference(observations_array, new_observations_array):
                 if False:  # XXX - being silly
                     antenna_diff[t] = observation
                 continue
-            antenna_diff[t] = observation - new_observation
+            antenna_diff[t] = sign * (observation - new_observation)
 
         diff.append(antenna_diff)
 
     return diff, 0, 0
+
+
+def ephemeris_difference(ephemeris, new_ephemeris, sign=1):
+    observation_epochs = ephemeris.keys()
+    state_diff = dict()
+    state_diff_norm = dict()
+    for t in observation_epochs:
+        state = ephemeris[t]
+        try:
+            new_state = new_ephemeris[t]
+        except:
+            if False:  # XXX - being silly
+                state_diff[t] = observation
+            continue
+        state_diff[t] = sign * transform_vector(state - new_state, state, all=True)
+        state_diff_norm[t] = np.array(
+            (
+                np.sqrt(np.sum(state_diff[t][0:3] ** 2)),
+                np.sqrt(np.sum(state_diff[t][3:6] ** 2)),
+            )
+        )
+
+    return state_diff, state_diff_norm, 0

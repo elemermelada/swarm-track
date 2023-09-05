@@ -42,7 +42,11 @@ add_dsn_stations(new_bodies.get_body("Earth"))
 
 
 def simulate_observations(
-    initial_state_perturbation=None, observe=None, start_day=0.0, duration=0.5
+    initial_state_perturbation=None,
+    override_initial_state=None,
+    observe=None,
+    start_day=0.0,
+    duration=0.5,
 ):
     from tudatpy.kernel import constants
 
@@ -52,7 +56,7 @@ def simulate_observations(
     )
     simulation_duration = duration * constants.JULIAN_DAY
     simulation_end_epoch = simulation_start_epoch + simulation_duration
-    observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 60.0)
+    observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 1.0)
 
     links = create_1w_dsn_links(observe, dsn_antennae_names)
 
@@ -89,6 +93,7 @@ def simulate_observations(
         bodies_to_propagate,
         ["Mars"],
         initial_state_error=0.0,
+        override_initial_state=override_initial_state,
         initial_state_perturbation=initial_state_perturbation,
         # gravity_order=0,
     )
@@ -122,9 +127,17 @@ def simulate_observations(
     )
 
 
-def get_estimator(estimator_initial_state_perturbation, start_day=0.0, duration=0.5):
+def get_estimator(
+    estimator_initial_state_perturbation,
+    observator_override_initial_state=None,
+    start_day=0.0,
+    duration=0.5,
+):
     _, actual_observations, _ = simulate_observations(
-        None, observe="MEX", start_day=start_day, duration=duration
+        override_initial_state=observator_override_initial_state,
+        observe="MEX",
+        start_day=start_day,
+        duration=duration,
     )
     _, flawed_observations, estimator = simulate_observations(
         initial_state_perturbation=np.array(estimator_initial_state_perturbation),
@@ -135,14 +148,18 @@ def get_estimator(estimator_initial_state_perturbation, start_day=0.0, duration=
     from tudatpy.kernel.interface import spice
     from tudatpy.kernel import constants
 
-    solution = spice.get_body_cartesian_state_at_epoch(
-        target_body_name=bodies_to_propagate[0],
-        observer_body_name="Mars",
-        reference_frame_name="J2000",
-        aberration_corrections="none",
-        ephemeris_time=(
-            4.0 * constants.JULIAN_YEAR + (100 + start_day) * constants.JULIAN_DAY
-        ),
+    solution = (
+        spice.get_body_cartesian_state_at_epoch(
+            target_body_name=bodies_to_propagate[0],
+            observer_body_name="Mars",
+            reference_frame_name="J2000",
+            aberration_corrections="none",
+            ephemeris_time=(
+                4.0 * constants.JULIAN_YEAR + (100 + start_day) * constants.JULIAN_DAY
+            ),
+        )
+        if observator_override_initial_state is None
+        else observator_override_initial_state
     )
     return estimator, actual_observations, solution
 
@@ -183,27 +200,60 @@ def get_state_diff(initial_state, initial_time, time):
     )
 
 
-obs_duration = 0.5
-obs_overlap = 0.1
+sim_start = 0.0
+obs_duration = 1
+obs_overlap = 0.2
+
+from tudatpy.kernel.interface import spice
+from tudatpy.kernel import constants
+
+real_initial_state = spice.get_body_cartesian_state_at_epoch(
+    target_body_name="MEX",
+    observer_body_name="Mars",
+    reference_frame_name="J2000",
+    aberration_corrections="none",
+    ephemeris_time=4.0 * constants.JULIAN_YEAR
+    + (100 + sim_start) * constants.JULIAN_DAY,
+)
+propagator_settings_estimation = basic_propagator(
+    4.0 * constants.JULIAN_YEAR + (100 + sim_start) * constants.JULIAN_DAY,
+    4.0 * constants.JULIAN_YEAR + (100 + sim_start + 12) * constants.JULIAN_DAY,
+    new_bodies,
+    bodies_to_propagate,
+    ["Mars"],
+)
+real_ephemeris, _ = retrieve_propagated_state_history(
+    propagator_settings_estimation, new_bodies, clean=False
+)
+
 for init_diff_direction in range(3):
     init_state_perturbation = np.array(
         [1e3 if init_diff_direction == i else 0 for i in range(6)]
     )
-    for step in range(10):
-        current_time = 5 + step * (obs_duration - obs_overlap)
+    override_init_state = None
+    for step in range(12):
+        current_time = sim_start + step * (obs_duration - obs_overlap)
         estimator, actual_observations, solution = get_estimator(
-            init_state_perturbation, current_time, obs_duration
+            init_state_perturbation,
+            observator_override_initial_state=override_init_state,
+            start_day=current_time,
+            duration=obs_duration,
         )
         result = estimate(estimator, actual_observations)
         final_parameters = np.array(result.parameter_history)[:, -1]
-        next_time = 5 + (step + 1) * (obs_duration - obs_overlap)
+        next_time = sim_start + (step + 1) * (obs_duration - obs_overlap)
+        from tudatpy.kernel import constants
+
+        override_init_state = real_ephemeris[
+            4.0 * constants.JULIAN_YEAR + (100 + next_time) * constants.JULIAN_DAY
+        ]
         init_state_perturbation = get_state_diff(
             final_parameters, current_time, next_time
         )
         with open(
-            f"out/BATCH_RESULTS_DSN_{['r','s','w'][init_diff_direction]}.out",
+            f"out/BATCH_RESULTS_DSN_{['r','s','w'][init_diff_direction]}_1s.out",
             "a+",
         ) as f:
             f.write(
-                f"{current_time}, {vector_rms(final_parameters[0:3]-solution[0:3])}, {vector_rms(final_parameters[3:6]-solution[3:6])}\n"
+                f"{current_time}, {np.sqrt(np.sum((final_parameters[0:3]-solution[0:3])**2))}, {np.sqrt(np.sum((final_parameters[3:6]-solution[3:6])**2))}, {', '.join([str(param) for param in final_parameters])}\n",
             )

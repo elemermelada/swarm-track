@@ -81,14 +81,16 @@ def transform_vector(v, state, velocity=False, all=False):
         ]
 
     if all:
-        return [
-            np.dot(v[0:3], r_vector),
-            np.dot(v[0:3], s_vector),
-            np.dot(v[0:3], w_vector),
-            np.dot(v[3:6], r_vector),
-            np.dot(v[3:6], s_vector),
-            np.dot(v[3:6], w_vector),
-        ]
+        return np.array(
+            [
+                np.dot(v[0:3], r_vector),
+                np.dot(v[0:3], s_vector),
+                np.dot(v[0:3], w_vector),
+                np.dot(v[3:6], r_vector),
+                np.dot(v[3:6], s_vector),
+                np.dot(v[3:6], w_vector),
+            ]
+        )
 
     return [
         np.dot(v[0:3], r_vector),

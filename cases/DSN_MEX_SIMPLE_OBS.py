@@ -37,16 +37,15 @@ from tudatpy.kernel.numerical_simulation import estimation
 USE_3D = True
 
 
-new_bodies = get_bodies(
-    simulation_start_epoch,
-    simulation_end_epoch,
-)
+new_bodies = get_bodies()
 add_dsn_stations(new_bodies.get_body("Earth"))
 
 
 def simulate_observations(
     initial_state_perturbation=None,
+    override_initial_state=None,
     observe=None,
+    noise=0.0,
 ):
     links = create_1w_dsn_links(observe, dsn_antennae_names)
 
@@ -73,7 +72,7 @@ def simulate_observations(
             dsn_antennae_names,
             fake=True if observe == "Mars" else False,
         ),
-        noise=0.0,
+        noise=noise,
     )
 
     # override_mars_harmonics.normalized_cosine_coefficients[]
@@ -84,6 +83,7 @@ def simulate_observations(
         bodies_to_propagate,
         ["Mars"],
         initial_state_error=0.0,
+        override_initial_state=override_initial_state,
         initial_state_perturbation=initial_state_perturbation,
         # gravity_order=0,
     )
@@ -133,23 +133,41 @@ def show_obs(sim_obs, axes, color, scatter=True, which=None):
             scatter=scatter,
             title=dsn_antennae_names[i],
         )
-        axes[i].legend()
+        # axes[i].legend()
 
     return axes
 
 
-real_obs = simulate_observations(None, observe="MEX")
+real_obs = simulate_observations(None, observe="MEX", noise=2e-4)
 fake_obs = simulate_observations(
-    initial_state_perturbation=np.array(
-        [
-            0 * -2.62e3 + 0 * 2.68e3 + 1e3,
-            0 * -1.85e3 + 0 * 1.8e3 + 1e3,
-            0 * -1.93e3 + 0 * 1.95e3 + 1e3,
-            1e0,
-            1e0,
-            1e0,
-        ]
-    ),
+    # initial_state_perturbation=np.array(
+    #     [
+    #         # 0 * -2.62e3 + 0 * 2.68e3 + 1e3,
+    #         # 0 * -1.85e3 + 0 * 1.8e3 + 1e3,
+    #         # 0 * -1.93e3 + 0 * 1.95e3 + 1e3,
+    #         # 1e0,
+    #         # 1e0,
+    #         # 1e0,
+    #     ]
+    # ),
+    # override_initial_state=np.array(
+    #     # [
+    #     #     4.02623428e06,
+    #     #     -5.57611567e06,
+    #     #     5.55648914e06,
+    #     #     1.02260251e03,
+    #     #     5.05921148e02,
+    #     #     1.94561622e03,
+    #     # ]
+    #     [
+    #         4.02619372e06,
+    #         -5.57611563e06,
+    #         5.55651868e06,
+    #         1.02259397e03,
+    #         5.05922068e02,
+    #         1.94562045e03,
+    #     ]
+    # ),
     observe="MEX",
 )
 
@@ -178,9 +196,9 @@ fig2, axes2 = init_observation_plot()
 show_obs(
     observations_difference(real_obs[0], fake_obs[0]),
     axes2,
-    "r",
+    "b",
 )
 
 fig2.tight_layout()
-fig2.savefig("out/DSN_MEX_SIMPLE_obs.svg")
+fig2.savefig("out/DSN_MEX_SIMPLE_res_noise_good.svg")
 fig2.show()
