@@ -21,7 +21,9 @@ def create_estimator(
 
 def estimate(estimator, simulated_observations, max_iters=10):
     convergence_checker = estimation.estimation_convergence_checker(
-        maximum_iterations=max_iters, number_of_iterations_without_improvement=2
+        maximum_iterations=max_iters,
+        number_of_iterations_without_improvement=2,
+        minimum_residual_change=1e-7,
     )
     estimation_input = estimation.EstimationInput(
         simulated_observations, convergence_checker=convergence_checker

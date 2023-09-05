@@ -58,4 +58,4 @@ links = create_1w_dsn_links("MEX", dsn_antennae_names)
 light_time_correction_settings = (
     observation.first_order_relativistic_light_time_correction(["Sun"])
 )
-observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 1)
+observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 1.0)
