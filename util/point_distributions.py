@@ -18,7 +18,7 @@ def cart_2_geo(coordinates: np.array, radius: float):
     return np.array([lat, long])
 
 
-def fibonacci_sphere(samples=10):
+def fibonacci_sphere(samples=10, sigma=0.0):
     coordinates = np.zeros((samples, 2))
     phi = np.pi * (np.sqrt(5.0) - 1.0)  # golden angle in radians
 
@@ -36,7 +36,7 @@ def fibonacci_sphere(samples=10):
     return coordinates
 
 
-def random_sphere(samples=10):
+def random_sphere(samples=10, sigma=0.0):
     coordinates = np.zeros((samples, 2))
 
     for i in range(samples):
@@ -66,7 +66,8 @@ def equatorial_sphere(samples=10, sigma=20.0):
 
     for i in range(samples):
         lat = np.random.normal(0, sigma)
-        long = -180 + 360 * i / (samples - 1)
+        # long = -180 + 360 * i / (samples)
+        long = np.random.random() * 360 - 180
         coordinates[i] = (lat, long)
 
     return coordinates

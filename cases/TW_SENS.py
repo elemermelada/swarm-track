@@ -70,8 +70,6 @@ def simulate_observations(
         ] = mars_harmonics[2:5]
 
     new_bodies = get_bodies(
-        simulation_start_epoch,
-        simulation_end_epoch,
         # override_mars_harmonics=override_mars_harmonics,
         extra_body={"name": "Sens"},
         remove_mars_rotation=REMOVE_MARS_ROTATION,

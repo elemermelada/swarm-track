@@ -22,7 +22,7 @@ simulation_start_epoch = 4.0 * constants.JULIAN_YEAR + 100.0 * constants.JULIAN_
 simulation_duration = 1 * constants.JULIAN_DAY
 simulation_end_epoch = simulation_start_epoch + simulation_duration
 
-tw_number = 90  # No. of TW beacons
+tw_number = 50  # No. of TW beacons
 
 ### CELESTIAL BODIES ###
 bodies = get_bodies()

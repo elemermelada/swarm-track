@@ -45,9 +45,17 @@ while not executed:
         executed = True
         from cases.DSN_MEX_BATCH_OBS import *
 
+    if RUN_APP.upper() == "DSNMRE":
+        executed = True
+        from cases.DSN_MEX_RANGE_EST import *
+
     if RUN_APP.upper() == "TWMSE":
         executed = True
         from cases.TW_MEX_SIMPLE_EST import *
+
+    if RUN_APP.upper() == "TWMSO":
+        executed = True
+        from cases.TW_MEX_SIMPLE_OBS import *
 
     if not executed:
         if default is None:
