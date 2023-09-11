@@ -33,161 +33,161 @@ from util.math import vector_rms
 
 import numpy as np
 
-dists = [fibonacci_sphere, random_sphere]
 # dists = [pole_sphere, equatorial_sphere]
-for dist in dists:
-    for twn in [30, 50, 90]:
-        for spread in [10.0, 20.0, 30.0]:
-            for freq in [10.0, 20.0, 30.0]:
-                for i in range(50):
-                    USE_3D = True
-                    TW_NUMBER = twn
+dist = equatorial_sphere
+twn = [90, 60, 90, 90, 90, 90]
+spread = [30.0, 30.0, 15.0, 30.0, 30.0, 30.0]
+freq = [10.0, 10.0, 10.0, 30.0, 10.0, 10.0]
+error = [1e-1, 1e-1, 1e-1, 1e-1, 0.5e-1, 1e-1]
+noise = [
+    5e-2,
+    5e-2,
+    5e-2,
+    5e-2,
+    5e-2,
+    1e-2,
+]
+for j in range(len(noise)):
+    for i in range(25):
+        USE_3D = True
+        TW_NUMBER = twn[j]
 
-                    tw_stations = dist(TW_NUMBER, sigma=30.0)
-                    tw_stations_wrapper = lambda err: (
-                        lambda x: add_error_to_coordinates(tw_stations, 3389.5e3, err)
-                    )
+        tw_stations = dist(TW_NUMBER, sigma=spread[j])
+        tw_stations_wrapper = lambda err: (
+            lambda x: add_error_to_coordinates(tw_stations, 3389.5e3, err)
+        )
 
-                    observation_times = np.arange(
-                        simulation_start_epoch, simulation_end_epoch, freq
-                    )
+        observation_times = np.arange(
+            simulation_start_epoch, simulation_end_epoch, freq[j]
+        )
 
-                    def simulate_observations(
-                        initial_state_perturbation=None,
-                        observe=None,
-                        err=0.0,
-                    ):
-                        new_bodies = get_bodies()
-                        add_tw_stations(
-                            new_bodies.get("Mars"), TW_NUMBER, tw_stations_wrapper(err)
-                        )
-                        links = create_1w_tw_links(
-                            TW_NUMBER, "MEX" if observe is None else observe
-                        )
+        def simulate_observations(
+            initial_state_perturbation=None,
+            observe=None,
+            err=0.0,
+        ):
+            new_bodies = get_bodies()
+            add_tw_stations(new_bodies.get("Mars"), TW_NUMBER, tw_stations_wrapper(err))
+            links = create_1w_tw_links(TW_NUMBER, "MEX" if observe is None else observe)
 
-                        # General observation settings
-                        # light_time_correction_settings = (
-                        # observation.first_order_relativistic_light_time_correction(["Sun"])
-                        # )
-                        # add_radiation_pressure(new_bodies, {"name": "Sens"})
+            # General observation settings
+            # light_time_correction_settings = (
+            # observation.first_order_relativistic_light_time_correction(["Sun"])
+            # )
+            # add_radiation_pressure(new_bodies, {"name": "Sens"})
 
-                        # Add doppler "sensors"
-                        (
-                            new_observation_settings_list,
-                            new_observation_simulation_settings,
-                            observable_type,
-                        ) = create_simple_1w_doppler_sensors(
-                            links,
-                            None,
-                            observation_times,
-                            lambda observation_type, elevation_angle, observation_simulation_settings, links: add_tw_viability_check(
-                                observation_type,
-                                elevation_angle,
-                                observation_simulation_settings,
-                                links,
-                            ),
-                            noise=5e-2,
-                        )
+            # Add doppler "sensors"
+            (
+                new_observation_settings_list,
+                new_observation_simulation_settings,
+                observable_type,
+            ) = create_simple_1w_doppler_sensors(
+                links,
+                None,
+                observation_times,
+                lambda observation_type, elevation_angle, observation_simulation_settings, links: add_tw_viability_check(
+                    observation_type,
+                    elevation_angle,
+                    observation_simulation_settings,
+                    links,
+                ),
+                noise=noise[j],
+            )
 
-                        # override_mars_harmonics.normalized_cosine_coefficients[]
-                        propagator_settings_estimation = basic_propagator(
-                            simulation_start_epoch,
-                            simulation_end_epoch,
-                            new_bodies,
-                            bodies_to_propagate,
-                            ["Mars"],
-                            initial_state_error=0.0,
-                            initial_state_perturbation=initial_state_perturbation,
-                            # gravity_order=0,
-                        )
+            # override_mars_harmonics.normalized_cosine_coefficients[]
+            propagator_settings_estimation = basic_propagator(
+                simulation_start_epoch,
+                simulation_end_epoch,
+                new_bodies,
+                bodies_to_propagate,
+                ["Mars"],
+                initial_state_error=0.0,
+                initial_state_perturbation=initial_state_perturbation,
+                # gravity_order=0,
+            )
 
-                        parameters_to_estimate = (
-                            create_gravimetry_parameters_to_estimate(
-                                propagator_settings_estimation, new_bodies
-                            )
-                        )
-                        estimator = create_estimator(
-                            new_bodies,
-                            parameters_to_estimate,
-                            new_observation_settings_list,
-                            propagator_settings_estimation,
-                        )
+            parameters_to_estimate = create_gravimetry_parameters_to_estimate(
+                propagator_settings_estimation, new_bodies
+            )
+            estimator = create_estimator(
+                new_bodies,
+                parameters_to_estimate,
+                new_observation_settings_list,
+                propagator_settings_estimation,
+            )
 
-                        from tudatpy.kernel.numerical_simulation import estimation
+            from tudatpy.kernel.numerical_simulation import estimation
 
-                        # Get simulated observations as ObservationCollection
-                        simulated_observations = estimation.simulate_observations(
-                            new_observation_simulation_settings,
-                            estimator.observation_simulators,
-                            new_bodies,
-                        )
+            # Get simulated observations as ObservationCollection
+            simulated_observations = estimation.simulate_observations(
+                new_observation_simulation_settings,
+                estimator.observation_simulators,
+                new_bodies,
+            )
 
-                        return (
-                            [
-                                antenna_results[-1].observations_history
-                                for antenna_results in simulated_observations.sorted_observation_sets[
-                                    observable_type
-                                ].values()
-                            ],
-                            simulated_observations,
-                            estimator,
-                        )
+            return (
+                [
+                    antenna_results[-1].observations_history
+                    for antenna_results in simulated_observations.sorted_observation_sets[
+                        observable_type
+                    ].values()
+                ],
+                simulated_observations,
+                estimator,
+            )
 
-                    (
-                        actual_observations_results,
-                        actual_observations,
-                        _,
-                    ) = simulate_observations(None, observe="MEX")
-                    (
-                        flawed_observations_results,
-                        flawed_observations,
-                        estimator,
-                    ) = simulate_observations(
-                        initial_state_perturbation=np.array(
-                            [
-                                1e3,
-                                0e3,
-                                0e3,
-                                0e0,
-                                0e0,
-                                0e0,
-                            ]
-                        ),
-                        observe="MEX",
-                        err=1e-1,
-                    )
-                    obs_diff = observations_difference(
-                        actual_observations_results, flawed_observations_results
-                    )
-                    print(
-                        vector_rms(
-                            np.concatenate(
-                                [
-                                    [l[0] for l in v]
-                                    for v in [list(t.values()) for t in obs_diff[0]]
-                                ]
-                            )
-                        )
-                    )
-                    from tudatpy.kernel.interface import spice
+        (
+            actual_observations_results,
+            actual_observations,
+            _,
+        ) = simulate_observations(None, observe="MEX")
+        (
+            flawed_observations_results,
+            flawed_observations,
+            estimator,
+        ) = simulate_observations(
+            initial_state_perturbation=np.array(
+                [
+                    1e3,
+                    0e3,
+                    0e3,
+                    0e0,
+                    0e0,
+                    0e0,
+                ]
+            ),
+            observe="MEX",
+            err=error[j],
+        )
+        obs_diff = observations_difference(
+            actual_observations_results, flawed_observations_results
+        )
+        print(
+            vector_rms(
+                np.concatenate(
+                    [[l[0] for l in v] for v in [list(t.values()) for t in obs_diff[0]]]
+                )
+            )
+        )
+        from tudatpy.kernel.interface import spice
 
-                    solution = spice.get_body_cartesian_state_at_epoch(
-                        target_body_name=bodies_to_propagate[0],
-                        observer_body_name="Mars",
-                        reference_frame_name="J2000",
-                        aberration_corrections="none",
-                        ephemeris_time=simulation_start_epoch,
-                    )
-                    result = estimate(estimator, actual_observations)
-                    final_parameters = np.array(result.parameter_history)[:, -1]
+        solution = spice.get_body_cartesian_state_at_epoch(
+            target_body_name=bodies_to_propagate[0],
+            observer_body_name="Mars",
+            reference_frame_name="J2000",
+            aberration_corrections="none",
+            ephemeris_time=simulation_start_epoch,
+        )
+        result = estimate(estimator, actual_observations)
+        final_parameters = np.array(result.parameter_history)[:, -1]
 
-                    path = f"out/{dist.__name__}/{TW_NUMBER}"
-                    if not os.path.exists(path):
-                        os.makedirs(path)
-                    with open(
-                        f"{path}/SINGLE_RESULTS_TW_{spread}_{freq}.out",
-                        "+a",
-                    ) as f:
-                        f.write(
-                            f"{(simulation_end_epoch-simulation_start_epoch)/86400}, {np.sqrt(np.sum((final_parameters[0:3]-solution[0:3])**2))}, {np.sqrt(np.sum((final_parameters[3:6]-solution[3:6])**2))}, {vector_rms(result.final_residuals)}, {', '.join([str(eph) for eph in final_parameters])}\n"
-                        )
+        path = f"out/"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        with open(
+            f"{path}/SINGLE_RESULTS_TW_{dist.__name__}_{TW_NUMBER}_{spread[j]}_{freq[j]}_{error[j]}_{noise[j]}.out",
+            "+a",
+        ) as f:
+            f.write(
+                f"{(simulation_end_epoch-simulation_start_epoch)/86400}, {np.sqrt(np.sum((final_parameters[0:3]-solution[0:3])**2))}, {np.sqrt(np.sum((final_parameters[3:6]-solution[3:6])**2))}, {vector_rms(result.final_residuals)}, {', '.join([str(eph) for eph in final_parameters])}\n"
+            )
