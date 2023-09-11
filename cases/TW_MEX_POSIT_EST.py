@@ -35,7 +35,7 @@ from util.math import vector_rms
 import numpy as np
 
 # dists = [pole_sphere, equatorial_sphere]
-dist = pole_sphere
+dist = fibonacci_sphere
 twn = [90, 30, 90, 90, 90, 90]
 spread = [30.0, 30.0, 5.0, 30.0, 30.0, 30.0]
 freq = [10.0, 10.0, 10.0, 30.0, 10.0, 10.0]
@@ -48,11 +48,11 @@ noise = [
     5e-2,
     5e-3,
 ]
-twn = [90]
-spread = [30.0]
-freq = [30.0]
-error = [0e-1]
-noise = [5e-2]
+twn = [90] * 12
+spread = [30.0] * 12
+freq = [10.0] * 12
+error = [1e-1] * 12
+noise = [5e-2] * 12
 for j in range(len(noise)):
     TW_NUMBER = twn[0]
 
@@ -67,14 +67,14 @@ for j in range(len(noise)):
     ]
 
     erraneous_beacons = add_error_to_coordinates(
-        REAL_POSITION, 3389526.6666666665, 1e-1, cart=True
+        REAL_POSITION, 3389526.6666666665, error[j], cart=True
     )
 
     FAKE_POSITION = add_error_to_coordinates(
         erraneous_beacons, 3389526.6666666665, 1e1, indeces=[4], cart=True
     )
 
-    for i in range(12):
+    for i in range(1):
         simulation_start_epocha = simulation_start_epoch + 1.5 * 86400 * i
         simulation_end_epocha = simulation_end_epoch + 1.5 * 86400 * i
         observation_times = np.arange(
