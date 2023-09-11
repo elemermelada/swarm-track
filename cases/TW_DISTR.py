@@ -7,8 +7,9 @@ from util.point_distributions import (
 )
 import numpy as np
 
-distributions = [equatorial_sphere]
-tw_numbers = [10, 30, 50, 100]
+distributions = [fibonacci_sphere, random_sphere]
+tw_numbers = [20, 100]
+spread = [15.0, 30.0]
 
 for dist in distributions:
     fig, axes = init_distributions_graph(len(tw_numbers))

@@ -41,7 +41,7 @@ def random_sphere(samples=10, sigma=0.0):
 
     for i in range(samples):
         X = np.random.random() * 2 - 1
-        lat = np.sign(X) * np.arccos(np.abs(X))
+        lat = np.rad2deg(np.sign(X) * np.arcsin(np.abs(X)))
         long = np.random.random() * 360 - 180
         coordinates[i] = (lat, long)
 
