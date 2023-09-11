@@ -50,7 +50,7 @@ noise = [
 ]
 twn = [90] * 12
 spread = [30.0] * 12
-freq = [10.0] * 12
+freq = [20.0] * 12
 error = [1e-1] * 12
 noise = [5e-2] * 12
 for j in range(len(noise)):
@@ -71,7 +71,7 @@ for j in range(len(noise)):
     )
 
     FAKE_POSITION = add_error_to_coordinates(
-        erraneous_beacons, 3389526.6666666665, 1e1, indeces=[4], cart=True
+        erraneous_beacons, 3389526.6666666665, 1e2, indeces=[4], cart=True
     )
 
     for i in range(1):
