@@ -43,11 +43,11 @@ from util.propagation import retrieve_propagated_state_history
 import numpy as np
 
 USE_3D = True
-TW_NUMBER = tw_number * 0 + 49
+TW_NUMBER = tw_number * 0 + 90
 
-tw_stations = pole_sphere(TW_NUMBER, sigma=30.0)
+tw_stations = fibonacci_sphere(TW_NUMBER, sigma=30.0)
 tw_stations_wrapper = lambda err: (
-    lambda x: add_error_to_coordinates(tw_stations, 3389.5e3, err)
+    lambda x: add_error_to_coordinates(tw_stations, 3389526.6666666665, err)
 )
 
 observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, 60.0)
@@ -174,14 +174,14 @@ obs_diff = observations_difference(
 )
 
 show_obs(
-    obs_diff,
+    (actual_observation_results, 0, 0),
     axes,
     "r",
 )
 
-obs_res = np.hstack(np.vstack(obs_diff[0]).values())
+# obs_res = np.hstack(np.vstack(obs_diff[0]).values())
 
-print(vector_rms(obs_res))
+# print(vector_rms(obs_res))
 fig.tight_layout()
 fig.show()
 # from tudatpy.kernel.interface import spice

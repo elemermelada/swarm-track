@@ -26,8 +26,6 @@ from estimation.estimation import (
 )
 
 from init.MEX_10TW import (
-    simulation_start_epoch,
-    simulation_end_epoch,
     bodies_to_propagate,
 )
 from util.math import vector_rms
@@ -47,7 +45,7 @@ for dist in dists:
 
     tw_stations = dist(TW_NUMBER, sigma=spread)
     tw_stations_wrapper = lambda err: (
-        lambda x: add_error_to_coordinates(tw_stations, 3389.5e3, err)
+        lambda x: add_error_to_coordinates(tw_stations, 3389526.6666666665, err)
     )
 
     new_bodies = get_bodies()

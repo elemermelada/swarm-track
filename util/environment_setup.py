@@ -118,15 +118,25 @@ def add_radiation_pressure(bodies, extra_body=None):
         )
 
 
-def add_tw_stations(mars, number, distribution):
+def add_tw_stations(mars, number, distribution, cart=False):
+    if cart:
+        for i, (x, y, z) in enumerate(distribution(number)):
+            # Add the ground station to the environment
+            environment_setup.add_ground_station(
+                mars,
+                f"TW{i}",
+                [x, y, z],
+                element_conversion.cartesian_position_type,
+            )
+        return
     for i, (station_latitude, station_longitude) in enumerate(distribution(number)):
-        station_altitude = 252.0
+        station_altitude = 3389526.6666666665
         # Add the ground station to the environment
         environment_setup.add_ground_station(
             mars,
             f"TW{i}",
             [station_altitude, station_latitude, station_longitude],
-            element_conversion.geodetic_position_type,
+            element_conversion.spherical_position_type,
         )
 
 

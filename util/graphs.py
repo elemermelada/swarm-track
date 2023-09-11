@@ -268,14 +268,14 @@ def init_observation_plot(n_axes=3):
     rows = int(np.ceil(np.sqrt(n_axes)))
 
     fig, axes = plt.subplots(
-        rows,
         rows - 1 if rows * (rows - 1) >= n_axes else rows,
+        rows,
         figsize=(9 * 1.5, 6 * 1.5),
     )
     if n_axes == 1:
         return fig, [axes]
 
-    axes = axes.reshape(rows * rows)
+    axes = axes.reshape(rows * (rows - 1 if rows * (rows - 1) >= n_axes else rows))
     for i in range(len(axes) - n_axes):
         axes[-1 - i].remove()
 

@@ -18,6 +18,7 @@ from observation.observation_setup import (
 
 from estimation.estimation_setup import (
     create_gravimetry_parameters_to_estimate,
+    create_positioning_parameters_to_estimate,
 )
 from estimation.estimation import (
     create_estimator,
@@ -47,31 +48,39 @@ noise = [
     5e-2,
     5e-3,
 ]
+twn = [90]
+spread = [30.0]
+freq = [30.0]
+error = [0e-1]
+noise = [5e-2]
 for j in range(len(noise)):
+    TW_NUMBER = twn[0]
+
+    tw_stations = dist(TW_NUMBER, sigma=spread[j])
+    new_bodies = get_bodies()
+    add_tw_stations(new_bodies.get("Mars"), TW_NUMBER, lambda x: tw_stations)
+    REAL_POSITION = [
+        new_bodies.get("Mars")
+        .ground_station_list[f"TW{k}"]
+        .station_state.cartesian_positon_at_reference_epoch
+        for k in range(TW_NUMBER)
+    ]
+
+    erraneous_beacons = add_error_to_coordinates(
+        REAL_POSITION, 3389526.6666666665, 1e-1, cart=True
+    )
+
+    FAKE_POSITION = add_error_to_coordinates(
+        erraneous_beacons, 3389526.6666666665, 1e1, indeces=[4], cart=True
+    )
+
     for i in range(12):
-        USE_3D = True
-        TW_NUMBER = twn[j]
-
-        tw_stations = dist(TW_NUMBER, sigma=spread[j])
-
-        ne_bodies = get_bodies()
-        add_tw_stations(ne_bodies.get("Mars"), TW_NUMBER, lambda x: tw_stations)
-        REAL_POSITION = [
-            ne_bodies.get("Mars")
-            .ground_station_list[f"TW{k}"]
-            .station_state.cartesian_positon_at_reference_epoch
-            for k in range(TW_NUMBER)
-        ]
-        FAKE_POSITION = REAL_POSITION
-
-        tw_stations_wrapper = lambda err: (
-            lambda x: add_error_to_coordinates(
-                np.array(REAL_POSITION), 3389526.6666666665, err, cart=True
-            )
-        )
-
+        simulation_start_epocha = simulation_start_epoch + 1.5 * 86400 * i
+        simulation_end_epocha = simulation_end_epoch + 1.5 * 86400 * i
         observation_times = np.arange(
-            simulation_start_epoch, simulation_end_epoch, freq[j]
+            simulation_start_epocha,
+            simulation_end_epocha,
+            freq[j],
         )
 
         def simulate_observations(
@@ -80,28 +89,12 @@ for j in range(len(noise)):
             err=0.0,
         ):
             new_bodies = get_bodies()
+            stat = REAL_POSITION if err == 0.0 else FAKE_POSITION
             add_tw_stations(
-                new_bodies.get("Mars"), TW_NUMBER, tw_stations_wrapper(err), cart=True
+                new_bodies.get("Mars"), TW_NUMBER, lambda x: stat, cart=True
             )
             links = create_1w_tw_links(TW_NUMBER, "MEX" if observe is None else observe)
 
-            global FAKE_POSITION
-            FAKE_POSITION = [
-                new_bodies.get("Mars")
-                .ground_station_list[f"TW{k}"]
-                .station_state.cartesian_positon_at_reference_epoch
-                for k in range(TW_NUMBER)
-            ]
-            print(
-                vector_rms(
-                    np.array(
-                        [
-                            np.mean(REAL_POSITION[i] - FAKE_POSITION[i])
-                            for i in range(len(REAL_POSITION))
-                        ]
-                    )
-                )
-            )
             # General observation settings
             # light_time_correction_settings = (
             # observation.first_order_relativistic_light_time_correction(["Sun"])
@@ -128,8 +121,8 @@ for j in range(len(noise)):
 
             # override_mars_harmonics.normalized_cosine_coefficients[]
             propagator_settings_estimation = basic_propagator(
-                simulation_start_epoch,
-                simulation_end_epoch,
+                simulation_start_epocha,
+                simulation_end_epocha,
                 new_bodies,
                 bodies_to_propagate,
                 ["Mars"],
@@ -138,7 +131,7 @@ for j in range(len(noise)):
                 # gravity_order=0,
             )
 
-            parameters_to_estimate = create_gravimetry_parameters_to_estimate(
+            parameters_to_estimate = create_positioning_parameters_to_estimate(
                 propagator_settings_estimation, new_bodies
             )
             estimator = create_estimator(
@@ -180,7 +173,7 @@ for j in range(len(noise)):
         ) = simulate_observations(
             initial_state_perturbation=np.array(
                 [
-                    1e3,
+                    0.01e3,
                     0e3,
                     0e3,
                     0e0,
@@ -189,7 +182,7 @@ for j in range(len(noise)):
                 ]
             ),
             observe="MEX",
-            err=error[j],
+            err=error[j] + 1,
         )
         obs_diff = observations_difference(
             actual_observations_results, flawed_observations_results
@@ -208,18 +201,22 @@ for j in range(len(noise)):
             observer_body_name="Mars",
             reference_frame_name="J2000",
             aberration_corrections="none",
-            ephemeris_time=simulation_start_epoch,
+            ephemeris_time=simulation_start_epocha,
         )
         result = estimate(estimator, actual_observations)
         final_parameters = np.array(result.parameter_history)[:, -1]
 
-        path = f"out"
+        from util.point_distributions import geo_2_cart
+
+        station_position = geo_2_cart(tw_stations[0], 3389526.6666666665)
+
+        path = f"out/"
         if not os.path.exists(path):
             os.makedirs(path)
         with open(
-            f"{path}/SINGLE_RESULTS_TW_{dist.__name__}_{TW_NUMBER}_{spread[j]}_{freq[j]}_{error[j]}_{noise[j]}.out",
+            f"{path}/POSIT_RESULTS_TW_{dist.__name__}_{TW_NUMBER}_{spread[j]}_{freq[j]}_{error[j]}_{noise[j]}.out",
             "+a",
         ) as f:
             f.write(
-                f"{(simulation_end_epoch-simulation_start_epoch)/86400}, {np.sqrt(np.sum((final_parameters[0:3]-solution[0:3])**2))}, {np.sqrt(np.sum((final_parameters[3:6]-solution[3:6])**2))}, {vector_rms(result.final_residuals)}, {', '.join([str(eph) for eph in final_parameters])}\n"
+                f"{(simulation_end_epocha-simulation_start_epocha)/86400}, {np.sqrt(np.sum((final_parameters[0:3]-solution[0:3])**2))}, {np.sqrt(np.sum((final_parameters[3:6]-solution[3:6])**2))}, {vector_rms(result.final_residuals)}, {', '.join([str(eph) for eph in final_parameters])}, {', '.join([str(REAL_POSITION[4][k]-FAKE_POSITION[4][k]) for k in range(len(REAL_POSITION[4]))])}, {', '.join([str(REAL_POSITION[4][k]-final_parameters[6+k]) for k in range(len(REAL_POSITION[4]))])}\n"
             )

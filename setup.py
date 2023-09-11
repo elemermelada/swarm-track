@@ -61,6 +61,10 @@ while not executed:
         executed = True
         from cases.TW_MEX_SIMPLE_OBS import *
 
+    if RUN_APP.upper() == "TWMPE":
+        executed = True
+        from cases.TW_MEX_POSIT_EST import *
+
     if not executed:
         if default is None:
             print("Add a default case first")

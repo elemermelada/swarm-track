@@ -74,14 +74,27 @@ def equatorial_sphere(samples=10, sigma=30.0):
 
 
 def add_error_to_coordinates(
-    coordinates_array: np.array, radius: float, error: float, indeces: int = None
+    coordinates_array: np.array,
+    radius: float,
+    error: float,
+    indeces: tuple[int] = None,
+    cart=False,
 ):
-    result_coordinates = []
+    result_coordinates = np.copy(coordinates_array)
+    if cart:
+        for i in range(len(coordinates_array)) if (indeces is None) else indeces:
+            cart_coords = coordinates_array[i]
+            cart_coords_w_error = np.array(
+                [np.random.normal(cart_coord, error) for cart_coord in cart_coords]
+            )
+            result_coordinates[i] = cart_coords_w_error
+        return result_coordinates
+
     for i in range(len(coordinates_array)) if (indeces is None) else indeces:
         coordinates = coordinates_array[i]
         cart_coords = geo_2_cart(coordinates, radius)
         cart_coords_w_error = np.array(
             [np.random.normal(cart_coord, error) for cart_coord in cart_coords]
         )
-        result_coordinates.append(cart_2_geo(cart_coords_w_error, radius))
+        result_coordinates[i] = cart_2_geo(cart_coords_w_error, radius)
     return result_coordinates
