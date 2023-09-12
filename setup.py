@@ -1,6 +1,6 @@
 executed = False
-defaulting = False
-default = "TWMSE"
+defaulting = True
+default = "TWMPE"
 
 print("By Elemer 😘")
 

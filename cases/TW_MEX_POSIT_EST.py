@@ -1,6 +1,7 @@
 import os
 from observation.observation_postprocessing import observations_difference
 from util.point_distributions import (
+    geo_2_cart,
     add_error_to_coordinates,
     pole_sphere,
     equatorial_sphere,
@@ -50,15 +51,19 @@ noise = [
 ]
 twn = [90] * 12
 spread = [30.0] * 12
-freq = [20.0] * 12
-error = [1e-1] * 12
+freq = [10.0] * 12
+error = [1e0] * 12
 noise = [5e-2] * 12
 for j in range(len(noise)):
     TW_NUMBER = twn[0]
 
     tw_stations = dist(TW_NUMBER, sigma=spread[j])
+    tw_stations_cart = [geo_2_cart(coord, 3389526.6666666665) for coord in tw_stations]
+
     new_bodies = get_bodies()
-    add_tw_stations(new_bodies.get("Mars"), TW_NUMBER, lambda x: tw_stations)
+    add_tw_stations(
+        new_bodies.get("Mars"), TW_NUMBER, lambda x: tw_stations_cart, cart=True
+    )
     REAL_POSITION = [
         new_bodies.get("Mars")
         .ground_station_list[f"TW{k}"]

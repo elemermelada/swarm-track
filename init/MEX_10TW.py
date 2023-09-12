@@ -19,7 +19,7 @@ spice.load_kernel(current_directory + "/kernels/ORMM_T19_040301000000_00068.BSP"
 spice.load_kernel(current_directory + "/kernels/ORMM_T19_040401000000_00072.BSP")
 # Set simulation start (January 1st, 2004 - 00:00) and end epochs (January 11th, 2004 - 00:00)
 simulation_start_epoch = 4.0 * constants.JULIAN_YEAR + 100.0 * constants.JULIAN_DAY
-simulation_duration = 3 * constants.JULIAN_DAY
+simulation_duration = 5 * constants.JULIAN_DAY
 simulation_end_epoch = simulation_start_epoch + simulation_duration
 
 tw_number = 50  # No. of TW beacons
