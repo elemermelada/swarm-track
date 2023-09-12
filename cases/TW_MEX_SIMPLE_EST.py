@@ -2,6 +2,7 @@ import os
 from observation.observation_postprocessing import observations_difference
 from util.point_distributions import (
     add_error_to_coordinates,
+    geo_2_cart,
     pole_sphere,
     equatorial_sphere,
     fibonacci_sphere,
@@ -34,7 +35,7 @@ from util.math import vector_rms
 import numpy as np
 
 # dists = [pole_sphere, equatorial_sphere]
-dist = pole_sphere
+dist = fibonacci_sphere
 twn = [90, 30, 90, 90, 90, 90]
 spread = [30.0, 30.0, 5.0, 30.0, 30.0, 30.0]
 freq = [10.0, 10.0, 10.0, 30.0, 10.0, 10.0]
@@ -53,9 +54,14 @@ for j in range(len(noise)):
         TW_NUMBER = twn[j]
 
         tw_stations = dist(TW_NUMBER, sigma=spread[j])
+        tw_stations_cart = [
+            geo_2_cart(coord, 3389526.6666666665) for coord in tw_stations
+        ]
 
         ne_bodies = get_bodies()
-        add_tw_stations(ne_bodies.get("Mars"), TW_NUMBER, lambda x: tw_stations)
+        add_tw_stations(
+            ne_bodies.get("Mars"), TW_NUMBER, lambda x: tw_stations_cart, cart=True
+        )
         REAL_POSITION = [
             ne_bodies.get("Mars")
             .ground_station_list[f"TW{k}"]

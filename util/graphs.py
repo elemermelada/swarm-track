@@ -352,5 +352,36 @@ def plot_sphere(ax: Axes, radius: float, fn: int):
     y = radius * np.outer(np.sin(theta), np.sin(phi))
     z = radius * np.outer(np.ones(np.size(theta)), np.cos(phi))
     # Plot the sphere
-    ax.plot_wireframe(x, y, z, linewidth=0.3, color=(0.1, 0.1, 0.1, 1))
+    ax.plot_wireframe(x, y, z, linewidth=0.3, color=(0.1, 0.1, 0.1, 0.5))
     return ax
+
+
+def plot_stations(ax, stations):
+    plot_sphere(ax, 1.0, fn=15)
+    for station in stations:
+        lat, long = station
+        x = np.cos(np.deg2rad(long)) * np.cos(np.deg2rad(lat))
+        y = np.sin(np.deg2rad(long)) * np.cos(np.deg2rad(lat))
+        z = np.sin(np.deg2rad(lat))
+        ax.plot(x, y, z, "or", markersize=15, zorder=999)
+
+    ax.set_title(f"{len(stations)} stations", fontsize=40)
+    # Hide grid lines
+    ax.grid(False)
+
+    # Hide axes ticks
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_zticks([])
+    # Make panes transparent
+    ax.xaxis.pane.fill = False  # Left pane
+    ax.yaxis.pane.fill = False  # Right pane
+    # Transparent spines
+    ax.w_xaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+    ax.w_yaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+    ax.w_zaxis.line.set_color((1.0, 1.0, 1.0, 0.0))
+
+    # Transparent panes
+    ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.set_box_aspect((1, 1, 1))

@@ -136,7 +136,7 @@ def add_tw_stations(mars, number, distribution, cart=False):
             mars,
             f"TW{i}",
             [station_altitude, station_latitude, station_longitude],
-            element_conversion.spherical_position_type,
+            element_conversion.geodetic_position_type,
         )
 
 
