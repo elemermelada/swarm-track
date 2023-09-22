@@ -147,8 +147,6 @@ def simulate_observations(
         ] = mars_harmonics[2:5]
 
     new_bodies = get_bodies(
-        simulation_start_epoch,
-        simulation_end_epoch,
         override_mars_harmonics=override_mars_harmonics,
         extra_body={"name": "Sens"},
     )
@@ -266,11 +264,14 @@ def show_obs(sim_obs, axes, color, scatter=True):
 show_obs(simulate_observations(None, observe="Mars"), axes, "r", scatter=False)
 show_obs(simulate_observations(None, observe="Sens", a=ORBIT_A), axes, "b")
 show_obs(simulate_observations(None, observe="Sens", a=-ORBIT_A), axes, "g")
+[ax.tick_params(axis="both", which="major", labelsize=14) for ax in axes]
 fig2.tight_layout()
 fig2.savefig("out/DSN_SENS_obs.svg")
 fig2.show()
 
 fig, ax = fig_ax
+[a.tick_params(axis="both", which="major", labelsize=14) for a in ax]
+ax[0].set_xlim([3, 5])
 fig.tight_layout()
 fig.savefig("out/DSN_SENS_Doppler.svg")
 fig.show()

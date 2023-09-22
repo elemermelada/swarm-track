@@ -36,10 +36,11 @@ import numpy as np
 
 # dists = [pole_sphere, equatorial_sphere]
 dist = fibonacci_sphere
+print(dist.__name__)
 twn = [90, 30, 90, 90, 90, 90]
 spread = [30.0, 30.0, 5.0, 30.0, 30.0, 30.0]
 freq = [10.0, 10.0, 10.0, 30.0, 10.0, 10.0]
-error = [1e-1, 1e-1, 1e-1, 1e-1, 2e0, 1e-1]
+error = [1e-1, 1e-1, 1e-1, 1e-1, 10e0, 1e-1]
 noise = [
     5e-2,
     5e-2,
@@ -48,8 +49,19 @@ noise = [
     5e-2,
     5e-3,
 ]
+sl = 4
+twn = [twn[sl]]
+spread = [spread[sl]]
+freq = [freq[sl]]
+error = [error[sl]]
+noise = [noise[sl]]
+# twn = [90]
+# spread = [30.0]
+# freq = [10.0]
+# error = [1e-1]
+# noise = [5e-2]
 for j in range(len(noise)):
-    for i in range(12):
+    for i in range(48):
         USE_3D = True
         TW_NUMBER = twn[j]
 

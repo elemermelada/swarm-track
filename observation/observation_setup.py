@@ -217,6 +217,7 @@ def create_simple_1w_doppler_sensors(
     observation_times,
     add_viability_check_fcn=add_tw_viability_check,
     noise=1.0e-3,
+    funky_noise=0.0,
 ):
     observable_type = observation.one_way_instantaneous_doppler_type
     observation_settings_list = add_simple_1w_doppler_observation_settings(
@@ -227,6 +228,10 @@ def create_simple_1w_doppler_sensors(
     observation_simulation_settings = add_observation_simulators(
         observation_times, links, observable_type, observation_simulation_settings=[]
     )
+    if funky_noise:
+        observation.add_gaussian_noise_to_observable_for_link_ends(
+            observation_simulation_settings, funky_noise, observable_type, links[4]
+        )
     if noise:
         add_noise(
             noise,

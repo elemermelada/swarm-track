@@ -26,58 +26,58 @@ def plot_trajectory_parameters(
     mode = "-"
     if scatter:
         mode = "x"
-    axes[-2].plot(
-        time[selector[0] : selector[1] : selector[2]],
-        pos[selector[0] : selector[1] : selector[2], 0],
-        mode,
-        linewidth=linewidth,
-        markersize=markersize,
-        label="r",
-    )
-    axes[-2].plot(
-        time[selector[0] : selector[1] : selector[2]],
-        pos[selector[0] : selector[1] : selector[2], 1],
-        mode,
-        linewidth=linewidth,
-        markersize=markersize,
-        label="s",
-    )
-    axes[-2].plot(
-        time[selector[0] : selector[1] : selector[2]],
-        pos[selector[0] : selector[1] : selector[2], 2],
-        mode,
-        linewidth=linewidth,
-        markersize=markersize,
-        label="h",
-    )
-    axes[-2].title.set_text("Position")
-    axes[-1].plot(
-        time[selector[0] : selector[1] : selector[2]],
-        vel[selector[0] : selector[1] : selector[2], 0],
-        mode,
-        linewidth=linewidth,
-        markersize=markersize,
-        label="r",
-    )
-    axes[-1].plot(
-        time[selector[0] : selector[1] : selector[2]],
-        vel[selector[0] : selector[1] : selector[2], 1],
-        mode,
-        linewidth=linewidth,
-        markersize=markersize,
-        label="s",
-    )
-    axes[-1].plot(
-        time[selector[0] : selector[1] : selector[2]],
-        vel[selector[0] : selector[1] : selector[2], 2],
-        mode,
-        linewidth=linewidth,
-        markersize=markersize,
-        label="h",
-    )
-    axes[-1].title.set_text("Velocity")
-    axes[-2].legend()
-    axes[-1].legend()
+    # axes[-2].plot(
+    #     time[selector[0] : selector[1] : selector[2]],
+    #     pos[selector[0] : selector[1] : selector[2], 0],
+    #     mode,
+    #     linewidth=linewidth,
+    #     markersize=markersize,
+    #     label="r",
+    # )
+    # axes[-2].plot(
+    #     time[selector[0] : selector[1] : selector[2]],
+    #     pos[selector[0] : selector[1] : selector[2], 1],
+    #     mode,
+    #     linewidth=linewidth,
+    #     markersize=markersize,
+    #     label="s",
+    # )
+    # axes[-2].plot(
+    #     time[selector[0] : selector[1] : selector[2]],
+    #     pos[selector[0] : selector[1] : selector[2], 2],
+    #     mode,
+    #     linewidth=linewidth,
+    #     markersize=markersize,
+    #     label="h",
+    # )
+    # axes[-2].set_title("Position")
+    # axes[-1].plot(
+    #     time[selector[0] : selector[1] : selector[2]],
+    #     vel[selector[0] : selector[1] : selector[2], 0],
+    #     mode,
+    #     linewidth=linewidth,
+    #     markersize=markersize,
+    #     label="r",
+    # )
+    # axes[-1].plot(
+    #     time[selector[0] : selector[1] : selector[2]],
+    #     vel[selector[0] : selector[1] : selector[2], 1],
+    #     mode,
+    #     linewidth=linewidth,
+    #     markersize=markersize,
+    #     label="s",
+    # )
+    # axes[-1].plot(
+    #     time[selector[0] : selector[1] : selector[2]],
+    #     vel[selector[0] : selector[1] : selector[2], 2],
+    #     mode,
+    #     linewidth=linewidth,
+    #     markersize=markersize,
+    #     label="h",
+    # )
+    # axes[-1].set_title("Velocity")
+    # axes[-2].legend()
+    # axes[-1].legend()
 
     axes[0].plot(
         time[selector[0] : selector[1] : selector[2]],
@@ -86,7 +86,7 @@ def plot_trajectory_parameters(
         linewidth=linewidth,
         markersize=markersize,
     )
-    axes[0].title.set_text("a")
+    axes[0].set_title("a", fontsize=18)
     axes[1].plot(
         time[selector[0] : selector[1] : selector[2]],
         kep[selector[0] : selector[1] : selector[2], 1],
@@ -94,7 +94,7 @@ def plot_trajectory_parameters(
         linewidth=linewidth,
         markersize=markersize,
     )
-    axes[1].title.set_text("e")
+    axes[1].set_title("e", fontsize=18)
     axes[2].plot(
         time[selector[0] : selector[1] : selector[2]],
         kep[selector[0] : selector[1] : selector[2], 2],
@@ -102,7 +102,7 @@ def plot_trajectory_parameters(
         linewidth=linewidth,
         markersize=markersize,
     )
-    axes[2].title.set_text("i")
+    axes[2].set_title("i", fontsize=18)
     axes[3].plot(
         time[selector[0] : selector[1] : selector[2]],
         kep[selector[0] : selector[1] : selector[2], 3],
@@ -110,7 +110,7 @@ def plot_trajectory_parameters(
         linewidth=linewidth,
         markersize=markersize,
     )
-    axes[3].title.set_text(r"\omega")
+    axes[3].set_title(r"\omega", fontsize=18)
     axes[4].plot(
         time[selector[0] : selector[1] : selector[2]],
         kep[selector[0] : selector[1] : selector[2], 4],
@@ -118,7 +118,7 @@ def plot_trajectory_parameters(
         linewidth=linewidth,
         markersize=markersize,
     )
-    axes[4].title.set_text(r"\Omega")
+    axes[4].set_title(r"\Omega", fontsize=18)
     axes[5].plot(
         time[selector[0] : selector[1] : selector[2]],
         kep[selector[0] : selector[1] : selector[2], 5],
@@ -126,22 +126,22 @@ def plot_trajectory_parameters(
         linewidth=linewidth,
         markersize=markersize,
     )
-    axes[5].title.set_text(r"\theta")
-    axes[6].plot(
-        time[selector[0] : selector[1] : selector[2]],
-        [
-            fix_angle(
-                kep[selector[0] : selector[1] : selector[2], 5][i]
-                + kep[selector[0] : selector[1] : selector[2], 3][i],
-                mode=2,
-            )
-            for i in range(len(kep[selector[0] : selector[1] : selector[2], 5]))
-        ],
-        mode,
-        linewidth=linewidth,
-        markersize=markersize,
-    )
-    axes[6].title.set_text(r"\theta + \omega")
+    axes[5].set_title(r"\theta", fontsize=18)
+    # axes[6].plot(
+    #     time[selector[0] : selector[1] : selector[2]],
+    #     [
+    #         fix_angle(
+    #             kep[selector[0] : selector[1] : selector[2], 5][i]
+    #             + kep[selector[0] : selector[1] : selector[2], 3][i],
+    #             mode=2,
+    #         )
+    #         for i in range(len(kep[selector[0] : selector[1] : selector[2], 5]))
+    #     ],
+    #     mode,
+    #     linewidth=linewidth,
+    #     markersize=markersize,
+    # )
+    # axes[6].set_title(r"\theta + \omega")
 
 
 def plot_ephemeris(
@@ -296,7 +296,7 @@ def plot_observations(
     times = (times - start_date) / 86400
     if scatter:
         if marker is None:
-            marker = "x"
+            marker = "o"
         ax.plot(
             times,
             observations,
@@ -318,10 +318,10 @@ def plot_observations(
             # label="Mars"
         )
     if title:
-        ax.set_title(title)
+        ax.set_title(title, fontsize=18)
 
     # ax.set_xlim([0, 1])
-    ax.set_xlabel("Time (days)")
+    ax.set_xlabel("Time (days)", fontsize=16)
 
 
 def init_distributions_graph(n_axes=3):

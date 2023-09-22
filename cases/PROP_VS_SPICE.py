@@ -107,7 +107,7 @@ fig_res.tight_layout()
 fig_res.savefig("out/" + orb_case.upper() + "_res.svg")
 fig_res.show()
 
-fig_comp, axes_comp = init_observation_plot(n_axes=9)
+fig_comp, axes_comp = init_observation_plot(n_axes=6)
 plot_trajectory_parameters(
     axes_comp,
     (time_vector - simulation_start_epoch) / 86400,
@@ -127,6 +127,7 @@ plot_trajectory_parameters(
     selector=(14400, 14400 + 1440, 3),
 )
 
+[ax.tick_params(axis="both", which="major", labelsize=18) for ax in axes_comp]
 fig_comp.tight_layout()
 fig_comp.savefig("out/" + orb_case.upper() + "_comp.svg")
 fig_comp.show()

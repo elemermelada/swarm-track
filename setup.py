@@ -1,6 +1,6 @@
 executed = False
-defaulting = False
-default = "TWMSE"
+defaulting = True
+default = "TWMPE"
 
 print("By Elemer 😘")
 
@@ -60,6 +60,14 @@ while not executed:
     if RUN_APP.upper() == "TWMSO":
         executed = True
         from cases.TW_MEX_SIMPLE_OBS import *
+
+    if RUN_APP.upper() == "TWMBE":
+        executed = True
+        from cases.TW_MEX_BATCH_EST import *
+
+    if RUN_APP.upper() == "TWMBO":
+        executed = True
+        from cases.TW_MEX_BATCH_OBS import *
 
     if RUN_APP.upper() == "TWMPE":
         executed = True

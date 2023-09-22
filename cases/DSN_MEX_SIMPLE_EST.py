@@ -1,3 +1,5 @@
+from matplotlib import pyplot as plt
+from observation.observation_postprocessing import observations_difference
 from util.environment_setup import add_dsn_stations, get_bodies
 from util.dynamical_models import basic_propagator
 from util.graphs import (
@@ -26,7 +28,7 @@ from estimation.estimation import (
 from init.MEX_DSN import (
     simulation_start_epoch,
     simulation_end_epoch,
-    observation_times,
+    # observation_times,
     dsn_antennae_names,
     bodies_to_propagate,
 )
@@ -46,7 +48,10 @@ def simulate_observations(
     initial_state_perturbation=None,
     override_initial_state=None,
     observe=None,
+    noise=2e-4,
+    obs_f=1.0,
 ):
+    observation_times = np.arange(simulation_start_epoch, simulation_end_epoch, obs_f)
     links = create_1w_dsn_links(observe, dsn_antennae_names)
 
     # General observation settings
@@ -72,7 +77,7 @@ def simulate_observations(
             dsn_antennae_names,
             fake=True if observe == "Mars" else False,
         ),
-        noise=2e-4,
+        noise=noise,
     )
 
     propagator_settings_estimation = basic_propagator(
@@ -116,7 +121,16 @@ def simulate_observations(
     )
 
 
-fig2, axes = init_observation_plot()
+def init_plot():
+    fig = plt.figure()
+
+    gs = fig.add_gridspec(3, 3)
+    ax1 = fig.add_subplot(gs[0, 0:3])
+    ax2 = fig.add_subplot(gs[1, 0:3])
+    ax3 = fig.add_subplot(gs[2, 0:3])
+    axes = [ax1, ax2, ax3]
+
+    return fig, axes
 
 
 def show_obs(sim_obs, axes, color, scatter=True, which=None):
@@ -139,19 +153,22 @@ def show_obs(sim_obs, axes, color, scatter=True, which=None):
     return axes
 
 
-_, actual_observations, _ = simulate_observations(None, observe="MEX")
-_, flawed_observations, estimator = simulate_observations(
-    override_initial_state=np.array(
+actual_observations_results, actual_observations, _ = simulate_observations(
+    None, observe="MEX"
+)
+flawed_observations_results, flawed_observations, estimator = simulate_observations(
+    initial_state_perturbation=np.array(
         [
-            4.02623428e06,
-            -5.57611567e06,
-            5.55648914e06,
-            1.02260251e03,
-            5.05921148e02,
-            1.94561622e03,
+            1e03,
+            0e06,
+            0e06,
+            0e03,
+            0e02,
+            0e03,
         ]
     ),
     observe="MEX",
+    noise=0.0,
 )
 from tudatpy.kernel.interface import spice
 
@@ -164,11 +181,29 @@ solution = spice.get_body_cartesian_state_at_epoch(
 )
 result = estimate(estimator, actual_observations)
 final_parameters = np.array(result.parameter_history)[:, -1]
+final_observation_results, _, _ = simulate_observations(
+    override_initial_state=final_parameters, noise=0.0, observe="MEX"
+)
 with open("out/timestamps_bench_DSN.out", "+a") as f:
     f.write(
         f"{(simulation_end_epoch-simulation_start_epoch)/86400}, {np.linalg.norm(final_parameters[0:3]-solution[0:3])}, {np.linalg.norm(final_parameters[3:6]-solution[3:6])}\n"
     )
 
+fig2, axes = init_plot()
+resu = observations_difference(actual_observations_results, final_observation_results)
+show_obs(resu, axes, "b")
+[ax.set_xlim([0, 1]) for ax in axes]
+[ax.tick_params(axis="both", which="major", labelsize=14) for ax in axes]
 fig2.tight_layout()
-# fig2.savefig("out/DSN_SENS_obs.svg")
+fig2.savefig("out/DSN_SENS_obs_1.0.svg")
 fig2.show()
+
+fig3, axes2 = init_plot()
+noiseless_observation_results, _, _ = simulate_observations(noise=0.0, observe="MEX")
+resu = observations_difference(final_observation_results, noiseless_observation_results)
+show_obs(resu, axes2, "b")
+[ax.set_xlim([0, 1]) for ax in axes2]
+[ax.tick_params(axis="both", which="major", labelsize=14) for ax in axes2]
+fig3.tight_layout()
+fig3.savefig("out/DSN_SENS_obs_noiseless_1.0.svg")
+fig3.show()

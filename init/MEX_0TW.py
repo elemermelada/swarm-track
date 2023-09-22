@@ -34,7 +34,7 @@ initial_state = spice.get_body_cartesian_state_at_epoch(
 tw_number = 0  # No. of TW beacons
 
 ### CELESTIAL BODIES ###
-bodies = get_bodies(simulation_start_epoch, simulation_end_epoch)
+bodies = get_bodies()
 
 
 # General observation settings

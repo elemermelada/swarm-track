@@ -119,7 +119,7 @@ def simulate_observations(
 
 duration = 1.0
 
-data = np.loadtxt("out/BATCH_RESULTS_DSN_RANGE_r_1s.out", delimiter=",", dtype=float)
+data = np.loadtxt("out/BATCH_RESULTS_TW_r_1s.out", delimiter=",", dtype=float)
 initial_dates = data[:, 0]
 initial_epochs = np.array(
     [
@@ -127,7 +127,7 @@ initial_epochs = np.array(
         for start_day in initial_dates
     ]
 )
-initial_states = data[:, 3:9]
+initial_states = data[:, 4:10]
 
 real_initial_state = spice.get_body_cartesian_state_at_epoch(
     target_body_name="MEX",
@@ -252,7 +252,7 @@ ax2.set_xlim([0, initial_dates[-1] + 1])
 [axes[i].set_xticklabels(axes[i].get_xticklabels(), fontsize=18) for i in range(4)]
 [axes[i].set_yticklabels(axes[i].get_yticklabels(), fontsize=18) for i in range(4)]
 fig.tight_layout()
-fig.savefig("out/DSN_MEX_RANGE_res.svg")
+fig.savefig("out/DSN_MEX_BATCH_res_eq.svg")
 fig.show()
 
 [axes2[i].grid(True) for i in range(4)]
@@ -260,7 +260,7 @@ fig.show()
 [axes2[i].set_xticklabels(axes2[i].get_xticklabels(), fontsize=18) for i in range(4)]
 [axes2[i].set_yticklabels(axes2[i].get_yticklabels(), fontsize=18) for i in range(4)]
 fig2.tight_layout()
-fig2.savefig("out/DSN_MEX_RANGE_pos_res.svg")
+fig2.savefig("out/DSN_MEX_BATCH_pos_res_eq.svg")
 fig2.show()
 
 [axes3[i].grid(True) for i in range(4)]
@@ -268,5 +268,5 @@ fig2.show()
 [axes3[i].set_xticklabels(axes3[i].get_xticklabels(), fontsize=18) for i in range(4)]
 [axes3[i].set_yticklabels(axes3[i].get_yticklabels(), fontsize=18) for i in range(4)]
 fig3.tight_layout()
-fig3.savefig("out/DSN_MEX_RANGE_pos_comp.svg")
+fig3.savefig("out/DSN_MEX_BATCH_pos_comp_eq.svg")
 fig3.show()

@@ -31,12 +31,12 @@ from init.SENS import (
     REMOVE_MARS_ROTATION,
     ORBIT_A,
 )
-from util.point_distributions import fibonacci_sphere
+from util.point_distributions import fibonacci_sphere, geo_2_cart
 from util.propagation import retrieve_propagated_state_history
 
 
 USE_3D = True
-TW_NUMBER = 49
+TW_NUMBER = 9
 
 
 def simulate_observations(
@@ -74,7 +74,11 @@ def simulate_observations(
         extra_body={"name": "Sens"},
         remove_mars_rotation=REMOVE_MARS_ROTATION,
     )
-    add_tw_stations(new_bodies.get("Mars"), TW_NUMBER, fibonacci_sphere)
+    tw_stations = fibonacci_sphere(TW_NUMBER)
+    tw_stations_cart = [geo_2_cart(coord, 3389526.6666666665) for coord in tw_stations]
+    add_tw_stations(
+        new_bodies.get("Mars"), TW_NUMBER, lambda x: tw_stations_cart, cart=True
+    )
     links = create_1w_tw_links(TW_NUMBER, "Sens" if observe is None else observe)
 
     # General observation settings
@@ -134,15 +138,6 @@ def simulate_observations(
         # gravity_order=0,
     )
 
-    ### Propagate to see wassup
-    ax, fig = init_trajectory_graph(threeD=USE_3D)
-    state_history, time_vector = retrieve_propagated_state_history(
-        propagator_settings_estimation, new_bodies, True
-    )
-    plot_ephemeris(ax, state_history * 1e-3, threeD=USE_3D, color="r")
-    plot_mars(ax, threeD=USE_3D)
-    fig.show()
-
     parameters_to_estimate = create_gravimetry_parameters_to_estimate(
         propagator_settings_estimation, new_bodies
     )
@@ -195,6 +190,8 @@ def show_obs(sim_obs, axes, color, scatter=True):
 
 show_obs(simulate_observations(None, observe="Sens", a=ORBIT_A), axes, "b")
 show_obs(simulate_observations(None, observe="Sens", a=-ORBIT_A), axes, "g")
+[ax.set_xlim([0, 1]) for ax in axes]
+[ax.tick_params(axis="both", which="major", labelsize=14) for ax in axes]
 fig2.tight_layout()
 fig2.savefig(
     f"out/{TW_NUMBER}/TW_SENS_obs_{ORBIT_A}_{observation_times[1]-observation_times[0]}{'_NOROT' if REMOVE_MARS_ROTATION else ''}.svg"

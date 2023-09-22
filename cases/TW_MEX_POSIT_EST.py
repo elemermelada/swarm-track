@@ -2,6 +2,7 @@ import os
 from observation.observation_postprocessing import observations_difference
 from util.point_distributions import (
     add_error_to_coordinates,
+    geo_2_cart,
     pole_sphere,
     equatorial_sphere,
     fibonacci_sphere,
@@ -35,7 +36,8 @@ from util.math import vector_rms
 import numpy as np
 
 # dists = [pole_sphere, equatorial_sphere]
-dist = fibonacci_sphere
+dist = pole_sphere
+print(dist.__name__)
 twn = [90, 30, 90, 90, 90, 90]
 spread = [30.0, 30.0, 5.0, 30.0, 30.0, 30.0]
 freq = [10.0, 10.0, 10.0, 30.0, 10.0, 10.0]
@@ -48,175 +50,157 @@ noise = [
     5e-2,
     5e-3,
 ]
-twn = [90] * 12
-spread = [30.0] * 12
-freq = [20.0] * 12
-error = [1e-1] * 12
-noise = [5e-2] * 12
+twn = [90] * 48
+spread = [30.0] * 48
+freq = [10.0] * 48
+error = [1e-0] * 48
+noise = [5e-3] * 48
 for j in range(len(noise)):
     TW_NUMBER = twn[0]
 
     tw_stations = dist(TW_NUMBER, sigma=spread[j])
-    new_bodies = get_bodies()
-    add_tw_stations(new_bodies.get("Mars"), TW_NUMBER, lambda x: tw_stations)
-    REAL_POSITION = [
-        new_bodies.get("Mars")
-        .ground_station_list[f"TW{k}"]
-        .station_state.cartesian_positon_at_reference_epoch
-        for k in range(TW_NUMBER)
-    ]
+    REAL_POSITION = [geo_2_cart(coord, 3389526.6666666665) for coord in tw_stations]
 
-    erraneous_beacons = add_error_to_coordinates(
-        REAL_POSITION, 3389526.6666666665, error[j], cart=True
-    )
+    # erraneous_beacons = add_error_to_coordinates(
+    #     REAL_POSITION, 3389526.6666666665, error[j], cart=True
+    # )
 
     FAKE_POSITION = add_error_to_coordinates(
-        erraneous_beacons, 3389526.6666666665, 1e2, indeces=[4], cart=True
+        REAL_POSITION, 3389526.6666666665, 1e2, indeces=[4], cart=True
     )
 
-    for i in range(1):
-        simulation_start_epocha = simulation_start_epoch + 1.5 * 86400 * i
-        simulation_end_epocha = simulation_end_epoch + 1.5 * 86400 * i
-        observation_times = np.arange(
-            simulation_start_epocha,
-            simulation_end_epocha,
-            freq[j],
-        )
+    observation_times = np.arange(
+        simulation_start_epoch,
+        simulation_end_epoch,
+        freq[j],
+    )
 
-        def simulate_observations(
-            initial_state_perturbation=None,
-            observe=None,
-            err=0.0,
-        ):
-            new_bodies = get_bodies()
-            stat = REAL_POSITION if err == 0.0 else FAKE_POSITION
-            add_tw_stations(
-                new_bodies.get("Mars"), TW_NUMBER, lambda x: stat, cart=True
-            )
-            links = create_1w_tw_links(TW_NUMBER, "MEX" if observe is None else observe)
+    def simulate_observations(
+        initial_state_perturbation=None,
+        observe=None,
+        err=0.0,
+    ):
+        new_bodies = get_bodies()
+        stat = REAL_POSITION if err == 0.0 else FAKE_POSITION
+        add_tw_stations(new_bodies.get("Mars"), TW_NUMBER, lambda x: stat, cart=True)
+        links = create_1w_tw_links(TW_NUMBER, "MEX" if observe is None else observe)
 
-            # General observation settings
-            # light_time_correction_settings = (
-            # observation.first_order_relativistic_light_time_correction(["Sun"])
-            # )
-            # add_radiation_pressure(new_bodies, {"name": "Sens"})
+        # General observation settings
+        # light_time_correction_settings = (
+        # observation.first_order_relativistic_light_time_correction(["Sun"])
+        # )
+        # add_radiation_pressure(new_bodies, {"name": "Sens"})
 
-            # Add doppler "sensors"
-            (
-                new_observation_settings_list,
-                new_observation_simulation_settings,
-                observable_type,
-            ) = create_simple_1w_doppler_sensors(
+        # Add doppler "sensors"
+        (
+            new_observation_settings_list,
+            new_observation_simulation_settings,
+            observable_type,
+        ) = create_simple_1w_doppler_sensors(
+            links,
+            None,
+            observation_times,
+            lambda observation_type, elevation_angle, observation_simulation_settings, links: add_tw_viability_check(
+                observation_type,
+                elevation_angle,
+                observation_simulation_settings,
                 links,
-                None,
-                observation_times,
-                lambda observation_type, elevation_angle, observation_simulation_settings, links: add_tw_viability_check(
-                    observation_type,
-                    elevation_angle,
-                    observation_simulation_settings,
-                    links,
-                ),
-                noise=noise[j],
-            )
-
-            # override_mars_harmonics.normalized_cosine_coefficients[]
-            propagator_settings_estimation = basic_propagator(
-                simulation_start_epocha,
-                simulation_end_epocha,
-                new_bodies,
-                bodies_to_propagate,
-                ["Mars"],
-                initial_state_error=0.0,
-                initial_state_perturbation=initial_state_perturbation,
-                # gravity_order=0,
-            )
-
-            parameters_to_estimate = create_positioning_parameters_to_estimate(
-                propagator_settings_estimation, new_bodies
-            )
-            estimator = create_estimator(
-                new_bodies,
-                parameters_to_estimate,
-                new_observation_settings_list,
-                propagator_settings_estimation,
-            )
-
-            from tudatpy.kernel.numerical_simulation import estimation
-
-            # Get simulated observations as ObservationCollection
-            simulated_observations = estimation.simulate_observations(
-                new_observation_simulation_settings,
-                estimator.observation_simulators,
-                new_bodies,
-            )
-
-            return (
-                [
-                    antenna_results[-1].observations_history
-                    for antenna_results in simulated_observations.sorted_observation_sets[
-                        observable_type
-                    ].values()
-                ],
-                simulated_observations,
-                estimator,
-            )
-
-        (
-            actual_observations_results,
-            actual_observations,
-            _,
-        ) = simulate_observations(None, observe="MEX")
-        (
-            flawed_observations_results,
-            flawed_observations,
-            estimator,
-        ) = simulate_observations(
-            initial_state_perturbation=np.array(
-                [
-                    0.01e3,
-                    0e3,
-                    0e3,
-                    0e0,
-                    0e0,
-                    0e0,
-                ]
             ),
-            observe="MEX",
-            err=error[j] + 1,
+            noise=False,
+            funky_noise=noise[j],
         )
-        obs_diff = observations_difference(
-            actual_observations_results, flawed_observations_results
+
+        # override_mars_harmonics.normalized_cosine_coefficients[]
+        propagator_settings_estimation = basic_propagator(
+            simulation_start_epoch,
+            simulation_end_epoch,
+            new_bodies,
+            bodies_to_propagate,
+            ["Mars"],
+            initial_state_error=0.0,
+            initial_state_perturbation=initial_state_perturbation,
+            # gravity_order=0,
         )
-        print(
-            vector_rms(
-                np.concatenate(
-                    [[l[0] for l in v] for v in [list(t.values()) for t in obs_diff[0]]]
-                )
-            )
+
+        parameters_to_estimate = create_positioning_parameters_to_estimate(
+            propagator_settings_estimation, new_bodies
         )
-        from tudatpy.kernel.interface import spice
-
-        solution = spice.get_body_cartesian_state_at_epoch(
-            target_body_name=bodies_to_propagate[0],
-            observer_body_name="Mars",
-            reference_frame_name="J2000",
-            aberration_corrections="none",
-            ephemeris_time=simulation_start_epocha,
+        estimator = create_estimator(
+            new_bodies,
+            parameters_to_estimate,
+            new_observation_settings_list,
+            propagator_settings_estimation,
         )
-        result = estimate(estimator, actual_observations)
-        final_parameters = np.array(result.parameter_history)[:, -1]
 
-        from util.point_distributions import geo_2_cart
+        from tudatpy.kernel.numerical_simulation import estimation
 
-        station_position = geo_2_cart(tw_stations[0], 3389526.6666666665)
+        # Get simulated observations as ObservationCollection
+        simulated_observations = estimation.simulate_observations(
+            new_observation_simulation_settings,
+            estimator.observation_simulators,
+            new_bodies,
+        )
 
-        path = f"out/"
-        if not os.path.exists(path):
-            os.makedirs(path)
-        with open(
-            f"{path}/POSIT_RESULTS_TW_{dist.__name__}_{TW_NUMBER}_{spread[j]}_{freq[j]}_{error[j]}_{noise[j]}.out",
-            "+a",
-        ) as f:
-            f.write(
-                f"{(simulation_end_epocha-simulation_start_epocha)/86400}, {np.sqrt(np.sum((final_parameters[0:3]-solution[0:3])**2))}, {np.sqrt(np.sum((final_parameters[3:6]-solution[3:6])**2))}, {vector_rms(result.final_residuals)}, {', '.join([str(eph) for eph in final_parameters])}, {', '.join([str(REAL_POSITION[4][k]-FAKE_POSITION[4][k]) for k in range(len(REAL_POSITION[4]))])}, {', '.join([str(REAL_POSITION[4][k]-final_parameters[6+k]) for k in range(len(REAL_POSITION[4]))])}\n"
-            )
+        return (
+            [
+                antenna_results[-1].observations_history
+                for antenna_results in simulated_observations.sorted_observation_sets[
+                    observable_type
+                ].values()
+            ],
+            simulated_observations,
+            estimator,
+        )
+
+    (
+        actual_observations_results,
+        actual_observations,
+        _,
+    ) = simulate_observations(None, observe="MEX")
+    (
+        flawed_observations_results,
+        flawed_observations,
+        estimator,
+    ) = simulate_observations(
+        initial_state_perturbation=np.array(
+            [
+                0e3,
+                0e3,
+                0e3,
+                0e0,
+                0e0,
+                0e0,
+            ]
+        ),
+        observe="MEX",
+        err=error[j],
+    )
+    obs_diff = observations_difference(
+        actual_observations_results, flawed_observations_results
+    )
+    from tudatpy.kernel.interface import spice
+
+    solution = spice.get_body_cartesian_state_at_epoch(
+        target_body_name=bodies_to_propagate[0],
+        observer_body_name="Mars",
+        reference_frame_name="J2000",
+        aberration_corrections="none",
+        ephemeris_time=simulation_start_epoch,
+    )
+    result = estimate(estimator, actual_observations)
+    final_parameters = np.array(result.parameter_history)[:, -1]
+
+    from util.point_distributions import geo_2_cart
+
+    station_position = geo_2_cart(tw_stations[0], 3389526.6666666665)
+
+    path = f"out/"
+    if not os.path.exists(path):
+        os.makedirs(path)
+    with open(
+        f"{path}/FUNKY_POSIT_RESULTS_TW_{dist.__name__}_{TW_NUMBER}_{spread[j]}_{freq[j]}_{error[j]}_{noise[j]}.out",
+        "+a",
+    ) as f:
+        f.write(
+            f"{(simulation_end_epoch-simulation_start_epoch)/86400}, {np.sqrt(np.sum((final_parameters[0:3]-solution[0:3])**2))}, {np.sqrt(np.sum((final_parameters[3:6]-solution[3:6])**2))}, {vector_rms(result.final_residuals)}, {', '.join([str(eph) for eph in final_parameters])}, {', '.join([str(REAL_POSITION[4][k]-FAKE_POSITION[4][k]) for k in range(len(REAL_POSITION[4]))])}, {', '.join([str(REAL_POSITION[4][k]-final_parameters[6+k]) for k in range(len(REAL_POSITION[4]))])}\n"
+        )
